@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+           fx:controller="com.myhometutor.controller.TutorRegisterController"
+           styleClass="root-container" stylesheets="@../css/style.css">
+    
+    <!-- Top Section with Logo and Title -->
+    <top>
+        <VBox alignment="CENTER" spacing="15" styleClass="header-section">
+            <padding>
+                <Insets top="30" bottom="20"/>
+            </padding>
+            
+            <ImageView fitHeight="80" fitWidth="250" preserveRatio="true">
+                <image>
+                    <Image url="@../images/logo.png"/>
+                </image>
+            </ImageView>
+            
+            <Label text="Tutor Registration" styleClass="page-title">
+                <font>
+                    <Font name="System Bold" size="26"/>
+                </font>
+            </Label>
+            
+            <Label text="Create your tutor account to browse and apply for tuition opportunities" styleClass="subtitle-label">
+                <font>
+                    <Font size="13"/>
+                </font>
+            </Label>
+        </VBox>
+    </top>
+    
+    <!-- Center Section with Registration Form -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" hbarPolicy="NEVER">
+            <VBox alignment="TOP_CENTER" spacing="20" styleClass="form-container">
+                <padding>
+                    <Insets top="30" right="60" bottom="40" left="60"/>
+                </padding>
+                
+                <!-- Personal Information Section -->
+                <VBox spacing="20" styleClass="section-container" maxWidth="600" prefWidth="600">
+                    <padding>
+                        <Insets top="25" right="35" bottom="25" left="35"/>
+                    </padding>
+                    
+                    <Label text="Personal Information" styleClass="section-title">
+                        <font>
+                            <Font name="System Bold" size="18"/>
+                        </font>
+                    </Label>
+                    
+                    <!-- Name Field -->
+                    <VBox spacing="8">
+                        <Label text="Full Name *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <TextField fx:id="nameField" promptText="Enter your full name" 
+                                  styleClass="custom-text-field" prefHeight="40"/>
+                    </VBox>
+                    
+                    <!-- Email Field -->
+                    <VBox spacing="8">
+                        <Label text="Email Address *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <TextField fx:id="emailField" promptText="Enter your email" 
+                                  styleClass="custom-text-field" prefHeight="40"/>
+                    </VBox>
+                    
+                    <!-- Phone Field -->
+                    <VBox spacing="8">
+                        <Label text="Phone Number *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <TextField fx:id="phoneField" promptText="Enter your phone number" 
+                                  styleClass="custom-text-field" prefHeight="40"/>
+                    </VBox>
+                    
+                    <!-- Password Field -->
+                    <VBox spacing="8">
+                        <Label text="Password *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <PasswordField fx:id="passwordField" promptText="Create a password" 
+                                      styleClass="custom-text-field" prefHeight="40"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Educational Information Section -->
+                <VBox spacing="20" styleClass="section-container" maxWidth="600" prefWidth="600">
+                    <padding>
+                        <Insets top="25" right="35" bottom="25" left="35"/>
+                    </padding>
+                    
+                    <Label text="Educational Information" styleClass="section-title">
+                        <font>
+                            <Font name="System Bold" size="18"/>
+                        </font>
+                    </Label>
+                    
+                    <!-- Institute Field -->
+                    <VBox spacing="8">
+                        <Label text="Institute/University *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <TextField fx:id="instituteField" promptText="Enter your institute/university name" 
+                                  styleClass="custom-text-field" prefHeight="40"/>
+                    </VBox>
+                    
+                    <!-- Class/Degree Field -->
+                    <VBox spacing="8">
+                        <Label text="Class/Degree *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <TextField fx:id="classField" promptText="Enter your current class/degree (e.g., BSc in CSE, 3rd Year)" 
+                                  styleClass="custom-text-field" prefHeight="40"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Tuition Preferences Section -->
+                <VBox spacing="20" styleClass="section-container" maxWidth="600" prefWidth="600">
+                    <padding>
+                        <Insets top="25" right="35" bottom="25" left="35"/>
+                    </padding>
+                    
+                    <Label text="Tuition Preferences" styleClass="section-title">
+                        <font>
+                            <Font name="System Bold" size="18"/>
+                        </font>
+                    </Label>
+                    
+                    <!-- Preferred Location Section -->
+                    <VBox spacing="8">
+                        <Label text="Preferred Location *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        
+                        <HBox spacing="10">
+                            <ComboBox fx:id="divisionCombo" promptText="Division" 
+                                     styleClass="custom-combo" prefHeight="40" HBox.hgrow="ALWAYS"/>
+                            <ComboBox fx:id="districtCombo" promptText="District" 
+                                     styleClass="custom-combo" prefHeight="40" HBox.hgrow="ALWAYS"/>
+                        </HBox>
+                        
+                        <ComboBox fx:id="areaCombo" promptText="Area" 
+                                 styleClass="custom-combo" prefHeight="40" maxWidth="Infinity"/>
+                    </VBox>
+                    
+                    <!-- Preferred Fee Field -->
+                    <VBox spacing="8">
+                        <Label text="Preferred Fee (BDT) *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <TextField fx:id="preferredFeeField" promptText="Enter your preferred fee amount" 
+                                  styleClass="custom-text-field" prefHeight="40"/>
+                    </VBox>
+                    
+                    <!-- Experience Field -->
+                    <VBox spacing="8">
+                        <Label text="Tuition Experience *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <TextField fx:id="experienceField" promptText="Enter years of experience (e.g., 2 years, 6 months)" 
+                                  styleClass="custom-text-field" prefHeight="40"/>
+                    </VBox>
+                    
+                    <!-- Additional Info Field -->
+                    <VBox spacing="8">
+                        <Label text="Additional Information" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <TextArea fx:id="additionalInfoArea" 
+                                 promptText="Enter subjects you can teach, achievements, or any other relevant information" 
+                                 styleClass="custom-text-area" prefRowCount="4" wrapText="true"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Action Buttons -->
+                <HBox spacing="15" alignment="CENTER">
+                    <padding>
+                        <Insets top="10" bottom="20"/>
+                    </padding>
+                    
+                    <Button fx:id="backButton" text="Back to Login" styleClass="secondary-button" 
+                           prefWidth="180" prefHeight="45" onAction="#handleBack">
+                        <font>
+                            <Font name="System Bold" size="14"/>
+                        </font>
+                    </Button>
+                    
+                    <Button fx:id="registerButton" text="Register" styleClass="primary-button" 
+                           prefWidth="180" prefHeight="45" onAction="#handleRegister">
+                        <font>
+                            <Font name="System Bold" size="14"/>
+                        </font>
+                    </Button>
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+    <!-- Bottom Copyright -->
+    <bottom>
+        <HBox alignment="CENTER" styleClass="footer-section">
+            <padding>
+                <Insets top="15" bottom="15"/>
+            </padding>
+            <Label text="© Copyright Saleh Sadid Mir" styleClass="copyright-label">
+                <font>
+                    <Font size="11"/>
+                </font>
+            </Label>
+        </HBox>
+    </bottom>
+    
+</BorderPane>
