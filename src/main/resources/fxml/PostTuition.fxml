@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+           fx:controller="com.myhometutor.controller.PostTuitionController"
+           styleClass="root-container">
+    
+    <top>
+        <VBox alignment="CENTER" spacing="15" styleClass="header-section">
+            <padding>
+                <Insets top="20" bottom="20"/>
+            </padding>
+            
+            <HBox alignment="CENTER" spacing="20">
+                <Label text="Post a Tuition Requirement" styleClass="page-title">
+                    <font>
+                        <Font name="System Bold" size="24"/>
+                    </font>
+                </Label>
+                
+                <Region HBox.hgrow="ALWAYS" maxWidth="50" />
+                
+                <ToggleButton fx:id="themeToggle" onAction="#handleThemeToggle" styleClass="theme-toggle" />
+            </HBox>
+        </VBox>
+    </top>
+    
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" hbarPolicy="NEVER">
+            <VBox alignment="TOP_CENTER" spacing="20" styleClass="form-container">
+                <padding>
+                    <Insets top="30" right="60" bottom="40" left="60"/>
+                </padding>
+                
+                <VBox spacing="20" styleClass="section-container" maxWidth="700" prefWidth="700">
+                    <padding>
+                        <Insets top="25" right="35" bottom="25" left="35"/>
+                    </padding>
+                    
+                    <GridPane hgap="20" vgap="15">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                        </columnConstraints>
+                        
+                        <!-- Row 1 -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="Subject *" styleClass="field-label"/>
+                            <TextField fx:id="subjectField" promptText="e.g. Math, Physics" styleClass="custom-text-field" prefHeight="40"/>
+                        </VBox>
+                        
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="Class/Grade *" styleClass="field-label"/>
+                            <TextField fx:id="classField" promptText="e.g. Class 10, HSC" styleClass="custom-text-field" prefHeight="40"/>
+                        </VBox>
+                        
+                        <!-- Row 2 -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <Label text="Tuition Type *" styleClass="field-label"/>
+                            <ComboBox fx:id="typeCombo" promptText="Select Type" styleClass="custom-combo" prefHeight="40" maxWidth="Infinity"/>
+                        </VBox>
+                        
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <Label text="Group *" styleClass="field-label"/>
+                            <ComboBox fx:id="groupCombo" promptText="Select Group" styleClass="custom-combo" prefHeight="40" maxWidth="Infinity"/>
+                        </VBox>
+                        
+                        <!-- Row 3 -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                            <Label text="Days per Week *" styleClass="field-label"/>
+                            <TextField fx:id="daysField" promptText="e.g. 3 days" styleClass="custom-text-field" prefHeight="40"/>
+                        </VBox>
+                        
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                            <Label text="Hours per Day *" styleClass="field-label"/>
+                            <TextField fx:id="hoursField" promptText="e.g. 1.5 hours" styleClass="custom-text-field" prefHeight="40"/>
+                        </VBox>
+                        
+                        <!-- Row 4 -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                            <Label text="Preferred Timing *" styleClass="field-label"/>
+                            <TextField fx:id="timingField" promptText="e.g. 5 PM - 7 PM" styleClass="custom-text-field" prefHeight="40"/>
+                        </VBox>
+                        
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                            <Label text="Salary (BDT) *" styleClass="field-label"/>
+                            <TextField fx:id="salaryField" promptText="e.g. 5000" styleClass="custom-text-field" prefHeight="40"/>
+                        </VBox>
+                        
+                        <!-- Row 5 -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
+                            <Label text="Address/Location *" styleClass="field-label"/>
+                            <TextArea fx:id="addressArea" promptText="Enter detailed address" styleClass="custom-text-area" prefRowCount="2" wrapText="true"/>
+                        </VBox>
+                        
+                        <!-- Row 6 -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2">
+                            <Label text="Additional Requirements" styleClass="field-label"/>
+                            <TextArea fx:id="additionalArea" promptText="Any specific requirements..." styleClass="custom-text-area" prefRowCount="3" wrapText="true"/>
+                        </VBox>
+                        
+                    </GridPane>
+                    
+                </VBox>
+                
+                <HBox spacing="15" alignment="CENTER">
+                    <padding>
+                        <Insets top="10" bottom="20"/>
+                    </padding>
+                    
+                    <Button fx:id="cancelButton" text="Cancel" styleClass="secondary-button" 
+                           prefWidth="150" prefHeight="45" onAction="#handleCancel">
+                        <font>
+                            <Font name="System Bold" size="14"/>
+                        </font>
+                    </Button>
+                    
+                    <Button fx:id="postButton" text="Post Tuition" styleClass="primary-button" 
+                           prefWidth="150" prefHeight="45" onAction="#handlePost">
+                        <font>
+                            <Font name="System Bold" size="14"/>
+                        </font>
+                    </Button>
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+</BorderPane>

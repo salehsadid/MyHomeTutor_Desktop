@@ -1,4 +1,4 @@
-/* Background: #0A1628 (Dark Navy Blue) */
+/* Background: Linear Gradient (Blue to Purple) */
 /* Primary Halogen: #5FE8D0 (Cyan) */
 /* Secondary Halogen: #F4D03F (Yellow) */
 /* Accent: #FF6B9D (Pink) */
@@ -7,12 +7,12 @@
 
 /* Root Container */
 .root-container {
-    -fx-background-color: #0A1628;
+    -fx-background-color: linear-gradient(to bottom right, #0f0c29, #302b63, #24243e);
 }
 
 /* Header Section */
 .header-section {
-    -fx-background-color: #0A1628;
+    -fx-background-color: rgba(15, 12, 41, 0.85);
 }
 
 /* Footer Section */
@@ -31,7 +31,7 @@
 
 /* Form Container */
 .form-container {
-    -fx-background-color: #0A1628;
+    -fx-background-color: rgba(10, 22, 40, 0.7);
 }
 
 /* Section Container */
@@ -344,3 +344,180 @@
 .success-field {
     -fx-border-color: #5FE8D0 !important;
 }
+
+/* Dashboard Styles */
+.top-header {
+    -fx-background-color: #0D1B2E;
+    -fx-border-color: #1A2941;
+    -fx-border-width: 0 0 2 0;
+}
+
+.app-name-label {
+    -fx-text-fill: #5FE8D0;
+    -fx-font-weight: bold;
+}
+
+.slogan-label {
+    -fx-text-fill: #8B95A9;
+}
+
+.header-button {
+    -fx-background-color: #1A3A5A;
+    -fx-text-fill: #E0E7FF;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-color: #2A4A6A;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+}
+
+.header-button:hover {
+    -fx-background-color: #2A4A6A;
+    -fx-text-fill: #5FE8D0;
+    -fx-border-color: #5FE8D0;
+}
+
+.logout-button {
+    -fx-background-color: #8B2635;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-color: #A53544;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+}
+
+.logout-button:hover {
+    -fx-background-color: #A53544;
+    -fx-border-color: #FF6B9D;
+}
+
+.theme-toggle {
+    -fx-background-color: #000000, #FFFFFF;
+    -fx-background-insets: 0, 3 3 3 28;
+    -fx-background-radius: 20, 20;
+    -fx-padding: 0;
+    -fx-text-fill: transparent;
+    -fx-cursor: hand;
+    -fx-border-color: #333333;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-pref-width: 50;
+    -fx-pref-height: 25;
+    -fx-min-width: 50;
+    -fx-min-height: 25;
+    -fx-max-width: 50;
+    -fx-max-height: 25;
+}
+
+.theme-toggle:hover {
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.2), 5, 0, 0, 0);
+}
+
+.theme-toggle:selected {
+    -fx-background-color: #000000, #FFFFFF;
+    -fx-background-insets: 0, 3 3 3 28;
+}
+
+.dashboard-container {
+    -fx-background-color: #0A1628;
+}
+
+.profile-pic-border {
+    -fx-fill: transparent;
+    -fx-stroke: linear-gradient(to bottom, #5FE8D0, #4ECDC4);
+    -fx-stroke-width: 4;
+}
+
+.user-name-label {
+    -fx-text-fill: #E0E7FF;
+    -fx-font-weight: bold;
+}
+
+.user-type-label {
+    -fx-text-fill: #5FE8D0;
+    -fx-font-style: italic;
+}
+
+.info-card {
+    -fx-background-color: #0D1B2E;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 12, 0, 0, 2);
+}
+
+.card-title {
+    -fx-text-fill: #5FE8D0;
+    -fx-font-weight: bold;
+}
+
+.card-separator {
+    -fx-background-color: #1A3A5A;
+}
+
+.info-label-bold {
+    -fx-text-fill: #A0B5D9;
+    -fx-font-weight: bold;
+}
+
+.info-label-value {
+    -fx-text-fill: #E0E7FF;
+}
+
+.change-photo-btn {
+    -fx-background-color: #5FE8D0;
+    -fx-text-fill: #0A1628;
+    -fx-background-radius: 15;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 2);
+}
+
+.change-photo-btn:hover {
+    -fx-background-color: #4ECDC4;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+/* Post Card Styles */
+.post-card {
+    -fx-background-color: linear-gradient(to bottom right, #0D1B2E, #1A2941);
+    -fx-background-radius: 15;
+    -fx-border-color: #5FE8D0;
+    -fx-border-width: 1;
+    -fx-border-radius: 15;
+    -fx-effect: dropshadow(gaussian, rgba(95, 232, 208, 0.25), 15, 0, 0, 0);
+    -fx-padding: 20;
+}
+
+.post-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(95, 232, 208, 0.5), 20, 0, 0, 0);
+    -fx-border-color: #4ECDC4;
+}
+
+.post-title {
+    -fx-text-fill: #5FE8D0;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.post-subtitle {
+    -fx-text-fill: #E0E7FF;
+    -fx-font-size: 16px;
+}
+
+.post-detail-label {
+    -fx-text-fill: #8B95A9;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.post-detail-value {
+    -fx-text-fill: #E0E7FF;
+    -fx-font-size: 14px;
+}
+
+.post-footer-text {
+    -fx-text-fill: #8B95A9;
+    -fx-font-style: italic;
+    -fx-font-size: 12px;
+}
+

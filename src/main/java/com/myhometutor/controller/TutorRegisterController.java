@@ -1,11 +1,14 @@
 package com.myhometutor.controller;
 
+import com.myhometutor.database.DatabaseManager;
+import com.myhometutor.util.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -15,21 +18,98 @@ public class TutorRegisterController {
     @FXML private TextField emailField;
     @FXML private TextField phoneField;
     @FXML private PasswordField passwordField;
-    @FXML private TextField instituteField;
-    @FXML private TextField classField;
+    @FXML private PasswordField confirmPasswordField;
+    @FXML private Label lengthCheckLabel;
+    @FXML private Label alphaCheckLabel;
+    @FXML private Label numberCheckLabel;
+    @FXML private Label matchCheckLabel;
+    
+    // College Info
+    @FXML private TextField collegeNameField;
+    @FXML private ComboBox<String> collegeGroupCombo;
+    @FXML private TextField hscYearField;
+    
+    // University Info
+    @FXML private TextField universityNameField;
+    @FXML private TextField universityDeptField;
+    @FXML private TextField universityYearField;
+    @FXML private TextField universitySessionField;
+    
     @FXML private ComboBox<String> divisionCombo;
     @FXML private ComboBox<String> districtCombo;
     @FXML private ComboBox<String> areaCombo;
+    
+    // Tuition Preferences
     @FXML private TextField preferredFeeField;
     @FXML private TextField experienceField;
+    @FXML private TextField preferredDayField;
+    @FXML private TextField preferredTimeField;
+    @FXML private TextField preferredLocationField;
+    
     @FXML private TextArea additionalInfoArea;
     @FXML private Button registerButton;
     @FXML private Button backButton;
+    
+    private DatabaseManager dbManager;
     
     @FXML
     private void initialize() {
         populateDivisions();
         setupDivisionListener();
+        setupPasswordListener();
+        
+        collegeGroupCombo.getItems().addAll("Science", "Arts", "Commerce");
+        
+        dbManager = DatabaseManager.getInstance();
+    }
+
+    private void setupPasswordListener() {
+        passwordField.textProperty().addListener((observable, oldValue, newValue) -> {
+            updatePasswordValidation(newValue);
+            checkPasswordMatch();
+        });
+        
+        confirmPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
+            checkPasswordMatch();
+        });
+    }
+
+    private void checkPasswordMatch() {
+        String password = passwordField.getText();
+        String confirmPassword = confirmPasswordField.getText();
+        
+        if (confirmPassword.isEmpty()) {
+            matchCheckLabel.setText("");
+            return;
+        }
+        
+        if (password.equals(confirmPassword)) {
+            matchCheckLabel.setText("✅ Password matched");
+            matchCheckLabel.setStyle("-fx-text-fill: #22c55e; -fx-font-size: 11px;");
+        } else {
+            matchCheckLabel.setText("❌ Password doesn't match");
+            matchCheckLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 11px;");
+        }
+    }
+
+    private void updatePasswordValidation(String password) {
+        boolean lengthValid = password.length() >= 8;
+        boolean alphaValid = password.matches(".*[a-zA-Z].*");
+        boolean numberValid = password.matches(".*\\d.*");
+
+        updateValidationLabel(lengthCheckLabel, lengthValid, "Minimum 8 characters");
+        updateValidationLabel(alphaCheckLabel, alphaValid, "Contains alphabet");
+        updateValidationLabel(numberCheckLabel, numberValid, "Contains number");
+    }
+
+    private void updateValidationLabel(Label label, boolean isValid, String text) {
+        if (isValid) {
+            label.setText("✅ " + text);
+            label.setStyle("-fx-text-fill: #22c55e; -fx-font-size: 11px;");
+        } else {
+            label.setText("❌ " + text);
+            label.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 11px;");
+        }
     }
     
     private void populateDivisions() {
@@ -130,34 +210,74 @@ public class TutorRegisterController {
         String email = emailField.getText().trim();
         String phone = phoneField.getText().trim();
         String password = passwordField.getText();
-        String institute = instituteField.getText().trim();
-        String tutorClass = classField.getText().trim();
+        
+        String collegeName = collegeNameField.getText().trim();
+        String collegeGroup = collegeGroupCombo.getValue();
+        String hscYear = hscYearField.getText().trim();
+        
+        String universityName = universityNameField.getText().trim();
+        String universityDept = universityDeptField.getText().trim();
+        String universityYear = universityYearField.getText().trim();
+        String universitySession = universitySessionField.getText().trim();
+        
         String division = divisionCombo.getValue();
         String district = districtCombo.getValue();
         String area = areaCombo.getValue();
+        
         String preferredFee = preferredFeeField.getText().trim();
         String experience = experienceField.getText().trim();
+        String preferredDay = preferredDayField.getText().trim();
+        String preferredTime = preferredTimeField.getText().trim();
+        String preferredLocation = preferredLocationField.getText().trim();
+        
         String additionalInfo = additionalInfoArea.getText().trim();
         
-        // TODO: Implement database insertion logic here
-        System.out.println("Tutor Registration:");
-        System.out.println("Name: " + name);
-        System.out.println("Email: " + email);
-        System.out.println("Phone: " + phone);
-        System.out.println("Institute: " + institute);
-        System.out.println("Class/Degree: " + tutorClass);
-        System.out.println("Preferred Location: " + division + ", " + district + ", " + area);
-        System.out.println("Preferred Fee: " + preferredFee);
-        System.out.println("Experience: " + experience);
-        System.out.println("Additional Info: " + additionalInfo);
+        // Check if username already exists
+        if (dbManager.usernameExists(email, "Tutor")) {
+            showAlert(Alert.AlertType.ERROR, "Registration Error", 
+                    "Email already registered. Please use a different email.");
+            return;
+        }
         
-        // Show success message
-        showAlert(Alert.AlertType.INFORMATION, "Registration Successful", 
-                "Tutor account created successfully!\n" +
-                "You can now login with your credentials.");
+        // Create JSON object with tutor data
+        JSONObject tutorData = new JSONObject();
+        tutorData.put("name", name);
+        tutorData.put("email", email);
+        tutorData.put("phone", phone);
         
-        // Navigate back to home page
-        handleBack();
+        tutorData.put("collegeName", collegeName);
+        tutorData.put("collegeGroup", collegeGroup);
+        tutorData.put("hscYear", hscYear);
+        
+        tutorData.put("universityName", universityName);
+        tutorData.put("universityDept", universityDept);
+        tutorData.put("universityYear", universityYear);
+        tutorData.put("universitySession", universitySession);
+        
+        tutorData.put("division", division);
+        tutorData.put("district", district);
+        tutorData.put("area", area);
+        
+        tutorData.put("preferredFee", preferredFee);
+        tutorData.put("experience", experience);
+        tutorData.put("preferredDay", preferredDay);
+        tutorData.put("preferredTime", preferredTime);
+        tutorData.put("preferredLocation", preferredLocation);
+        
+        tutorData.put("additionalInfo", additionalInfo);
+        
+        // Register tutor in database
+        boolean success = dbManager.registerTutor(email, password, tutorData);
+        
+        if (success) {
+            showAlert(Alert.AlertType.INFORMATION, "Registration Successful", 
+                    "Tutor account created successfully!\n" +
+                    "You can now login with your email and password.");
+            handleBack();
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Registration Failed", 
+                    "Failed to create account. Please try again.");
+        }
     }
     
     private boolean validateFields() {
@@ -180,19 +300,87 @@ public class TutorRegisterController {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your phone number.");
             return false;
         }
-        
-        if (passwordField.getText().isEmpty() || passwordField.getText().length() < 6) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Password must be at least 6 characters long.");
+
+        String password = passwordField.getText();
+        String confirmPassword = confirmPasswordField.getText();
+
+        if (password.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter a password.");
+            return false;
+        }
+
+        if (password.length() < 8 || !password.matches(".*[a-zA-Z].*") || !password.matches(".*\\d.*")) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Password does not meet all requirements.");
+            return false;
+        }
+
+        if (!password.equals(confirmPassword)) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Password doesn't match.");
+            return false;
+        }
+
+        if (collegeNameField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your college name.");
             return false;
         }
         
-        if (instituteField.getText().trim().isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your institute/university name.");
+        if (collegeGroupCombo.getValue() == null) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select your college group.");
             return false;
         }
         
-        if (classField.getText().trim().isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your class/degree.");
+        if (hscYearField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your HSC passing year.");
+            return false;
+        }
+        
+        if (universityNameField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your university name.");
+            return false;
+        }
+        
+        if (universityDeptField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your university department.");
+            return false;
+        }
+        
+        if (universityYearField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your university year.");
+            return false;
+        }
+        
+        if (universitySessionField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your university session.");
+            return false;
+        }
+        
+        if (divisionCombo.getValue() == null || districtCombo.getValue() == null || areaCombo.getValue() == null) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select complete location (Division, District, Area).");
+            return false;
+        }
+        
+        if (preferredFeeField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your preferred fee.");
+            return false;
+        }
+        
+        if (experienceField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your tuition experience.");
+            return false;
+        }
+        
+        if (preferredDayField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your preferred days.");
+            return false;
+        }
+        
+        if (preferredTimeField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your preferred time.");
+            return false;
+        }
+        
+        if (preferredLocationField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your preferred location details.");
             return false;
         }
         
@@ -226,9 +414,21 @@ public class TutorRegisterController {
             Parent root = loader.load();
             
             Stage stage = (Stage) backButton.getScene().getWindow();
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+            boolean maximized = stage.isMaximized();
+            boolean fullScreen = stage.isFullScreen();
+
             Scene scene = new Scene(root);
+            ThemeManager.getInstance().applyTheme(scene);
             stage.setScene(scene);
             stage.setTitle("MyHomeTutor - Home");
+            
+            // Restore dimensions
+            stage.setWidth(width);
+            stage.setHeight(height);
+            stage.setMaximized(maximized);
+            stage.setFullScreen(fullScreen);
             
         } catch (IOException e) {
             e.printStackTrace();

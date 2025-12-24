@@ -1,11 +1,14 @@
 package com.myhometutor.controller;
 
+import com.myhometutor.database.DatabaseManager;
+import com.myhometutor.util.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -15,22 +18,83 @@ public class StudentRegisterController {
     @FXML private TextField emailField;
     @FXML private TextField phoneField;
     @FXML private PasswordField passwordField;
+    @FXML private PasswordField confirmPasswordField;
+    @FXML private Label lengthCheckLabel;
+    @FXML private Label alphaCheckLabel;
+    @FXML private Label numberCheckLabel;
+    @FXML private Label matchCheckLabel;
     @FXML private TextField instituteField;
     @FXML private TextField classField;
-    @FXML private TextField subjectField;
+    @FXML private ComboBox<String> groupCombo;
     @FXML private ComboBox<String> divisionCombo;
     @FXML private ComboBox<String> districtCombo;
     @FXML private ComboBox<String> areaCombo;
-    @FXML private TextField timingField;
-    @FXML private TextField salaryField;
     @FXML private TextArea requirementsArea;
     @FXML private Button registerButton;
     @FXML private Button backButton;
     
+    private DatabaseManager dbManager;
+    
     @FXML
     private void initialize() {
         populateDivisions();
+        populateGroups();
         setupDivisionListener();
+        setupPasswordListener();
+        dbManager = DatabaseManager.getInstance();
+    }
+
+    private void setupPasswordListener() {
+        passwordField.textProperty().addListener((observable, oldValue, newValue) -> {
+            updatePasswordValidation(newValue);
+            checkPasswordMatch();
+        });
+        
+        confirmPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
+            checkPasswordMatch();
+        });
+    }
+
+    private void checkPasswordMatch() {
+        String password = passwordField.getText();
+        String confirmPassword = confirmPasswordField.getText();
+        
+        if (confirmPassword.isEmpty()) {
+            matchCheckLabel.setText("");
+            return;
+        }
+        
+        if (password.equals(confirmPassword)) {
+            matchCheckLabel.setText("✅ Password matched");
+            matchCheckLabel.setStyle("-fx-text-fill: #22c55e; -fx-font-size: 11px;");
+        } else {
+            matchCheckLabel.setText("❌ Password doesn't match");
+            matchCheckLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 11px;");
+        }
+    }
+
+    private void updatePasswordValidation(String password) {
+        boolean lengthValid = password.length() >= 8;
+        boolean alphaValid = password.matches(".*[a-zA-Z].*");
+        boolean numberValid = password.matches(".*\\d.*");
+
+        updateValidationLabel(lengthCheckLabel, lengthValid, "Minimum 8 characters");
+        updateValidationLabel(alphaCheckLabel, alphaValid, "Contains alphabet");
+        updateValidationLabel(numberCheckLabel, numberValid, "Contains number");
+    }
+
+    private void updateValidationLabel(Label label, boolean isValid, String text) {
+        if (isValid) {
+            label.setText("✅ " + text);
+            label.setStyle("-fx-text-fill: #22c55e; -fx-font-size: 11px;");
+        } else {
+            label.setText("❌ " + text);
+            label.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 11px;");
+        }
+    }
+
+    private void populateGroups() {
+        groupCombo.getItems().addAll("Science", "Commerce", "Humanities", "Dakhil");
     }
     
     private void populateDivisions() {
@@ -125,32 +189,44 @@ public class StudentRegisterController {
         String password = passwordField.getText();
         String institute = instituteField.getText().trim();
         String studentClass = classField.getText().trim();
-        String subject = subjectField.getText().trim();
+        String group = groupCombo.getValue();
         String division = divisionCombo.getValue();
         String district = districtCombo.getValue();
         String area = areaCombo.getValue();
-        String timing = timingField.getText().trim();
-        String salary = salaryField.getText().trim();
-        String requirements = requirementsArea.getText().trim();
+        String additionalInfo = requirementsArea.getText().trim();
         
-        // Todo: Implement database insertion logic here
-        System.out.println("Student Registration:");
-        System.out.println("Name: " + name);
-        System.out.println("Email: " + email);
-        System.out.println("Phone: " + phone);
-        System.out.println("Institute: " + institute);
-        System.out.println("Class: " + studentClass);
-        System.out.println("Subject: " + subject);
-        System.out.println("Location: " + division + ", " + district + ", " + area);
-        System.out.println("Timing: " + timing);
-        System.out.println("Salary: " + salary);
+        // Check if username already exists
+        if (dbManager.usernameExists(email, "Student")) {
+            showAlert(Alert.AlertType.ERROR, "Registration Error", 
+                    "This email is already registered.\nPlease use a different email or login.");
+            return;
+        }
         
-        // success message
-        showAlert(Alert.AlertType.INFORMATION, "Registration Successful", 
-                "Student account created successfully!\n" +
-                "You can now login with your credentials.");
+        // Create JSON object with student data
+        JSONObject studentData = new JSONObject();
+        studentData.put("name", name);
+        studentData.put("email", email);
+        studentData.put("phone", phone);
+        studentData.put("institute", institute);
+        studentData.put("class", studentClass);
+        studentData.put("group", group);
+        studentData.put("division", division);
+        studentData.put("district", district);
+        studentData.put("area", area);
+        studentData.put("additionalInfo", additionalInfo);
         
-        handleBack();
+        // Save to database
+        boolean success = dbManager.registerStudent(email, password, studentData);
+        
+        if (success) {
+            showAlert(Alert.AlertType.INFORMATION, "Registration Successful", 
+                    "Student account created successfully!\n" +
+                    "You can now login with your credentials.");
+            handleBack();
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Registration Error", 
+                    "Failed to create account.\nPlease try again.");
+        }
     }
     
     private boolean validateFields() {
@@ -174,8 +250,21 @@ public class StudentRegisterController {
             return false;
         }
         
-        if (passwordField.getText().isEmpty() || passwordField.getText().length() < 6) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Password must be at least 6 characters long.");
+        String password = passwordField.getText();
+        String confirmPassword = confirmPasswordField.getText();
+
+        if (password.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter a password.");
+            return false;
+        }
+
+        if (password.length() < 8 || !password.matches(".*[a-zA-Z].*") || !password.matches(".*\\d.*")) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Password does not meet all requirements.");
+            return false;
+        }
+
+        if (!password.equals(confirmPassword)) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Password doesn't match.");
             return false;
         }
         
@@ -189,23 +278,13 @@ public class StudentRegisterController {
             return false;
         }
         
-        if (subjectField.getText().trim().isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter the subject.");
+        if (groupCombo.getValue() == null) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select your group.");
             return false;
         }
         
         if (divisionCombo.getValue() == null || districtCombo.getValue() == null || areaCombo.getValue() == null) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select complete location (Division, District, Area).");
-            return false;
-        }
-        
-        if (timingField.getText().trim().isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter preferred timing.");
-            return false;
-        }
-        
-        if (salaryField.getText().trim().isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter salary amount.");
             return false;
         }
         
@@ -224,9 +303,21 @@ public class StudentRegisterController {
             Parent root = loader.load();
             
             Stage stage = (Stage) backButton.getScene().getWindow();
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+            boolean maximized = stage.isMaximized();
+            boolean fullScreen = stage.isFullScreen();
+
             Scene scene = new Scene(root);
+            ThemeManager.getInstance().applyTheme(scene);
             stage.setScene(scene);
             stage.setTitle("MyHomeTutor - Home");
+            
+            // Restore dimensions
+            stage.setWidth(width);
+            stage.setHeight(height);
+            stage.setMaximized(maximized);
+            stage.setFullScreen(fullScreen);
             
         } catch (IOException e) {
             e.printStackTrace();

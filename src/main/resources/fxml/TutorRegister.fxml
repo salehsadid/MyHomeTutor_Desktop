@@ -9,7 +9,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
            fx:controller="com.myhometutor.controller.TutorRegisterController"
-           styleClass="root-container" stylesheets="@../css/style.css">
+           styleClass="root-container">
     
     <!-- Top Section with Logo and Title -->
     <top>
@@ -100,6 +100,24 @@
                         </Label>
                         <PasswordField fx:id="passwordField" promptText="Create a password" 
                                       styleClass="custom-text-field" prefHeight="40"/>
+                        
+                        <VBox spacing="2" style="-fx-padding: 5 0 0 0;">
+                            <Label fx:id="lengthCheckLabel" text="❌ Minimum 8 characters" style="-fx-text-fill: #ef4444; -fx-font-size: 11px;"/>
+                            <Label fx:id="alphaCheckLabel" text="❌ Contains alphabet" style="-fx-text-fill: #ef4444; -fx-font-size: 11px;"/>
+                            <Label fx:id="numberCheckLabel" text="❌ Contains number" style="-fx-text-fill: #ef4444; -fx-font-size: 11px;"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- Confirm Password Field -->
+                    <VBox spacing="8">
+                        <Label text="Confirm Password *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <PasswordField fx:id="confirmPasswordField" promptText="Confirm your password" 
+                                      styleClass="custom-text-field" prefHeight="40"/>
+                        <Label fx:id="matchCheckLabel" text="" style="-fx-font-size: 11px;"/>
                     </VBox>
                 </VBox>
                 
@@ -109,31 +127,95 @@
                         <Insets top="25" right="35" bottom="25" left="35"/>
                     </padding>
                     
-                    <Label text="Educational Information" styleClass="section-title">
+                    <Label text="Educational Background" styleClass="section-title">
                         <font>
                             <Font name="System Bold" size="18"/>
                         </font>
                     </Label>
                     
-                    <!-- Institute Field -->
+                    <!-- College Info -->
+                    <Label text="College Information" styleClass="subsection-title">
+                        <font>
+                            <Font name="System Bold" size="14"/>
+                        </font>
+                    </Label>
+                    
                     <VBox spacing="8">
-                        <Label text="Institute/University *" styleClass="field-label">
+                        <Label text="College Name *" styleClass="field-label">
                             <font>
                                 <Font size="13"/>
                             </font>
                         </Label>
-                        <TextField fx:id="instituteField" promptText="Enter your institute/university name" 
+                        <TextField fx:id="collegeNameField" promptText="Enter college name" 
                                   styleClass="custom-text-field" prefHeight="40"/>
                     </VBox>
                     
-                    <!-- Class/Degree Field -->
+                    <HBox spacing="10">
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label text="Group *" styleClass="field-label">
+                                <font>
+                                    <Font size="13"/>
+                                </font>
+                            </Label>
+                            <ComboBox fx:id="collegeGroupCombo" promptText="Select Group" 
+                                     styleClass="custom-combo" prefHeight="40" maxWidth="Infinity"/>
+                        </VBox>
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label text="HSC Passing Year *" styleClass="field-label">
+                                <font>
+                                    <Font size="13"/>
+                                </font>
+                            </Label>
+                            <TextField fx:id="hscYearField" promptText="Year" 
+                                      styleClass="custom-text-field" prefHeight="40"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <!-- University Info -->
+                    <Label text="University Information" styleClass="subsection-title">
+                        <font>
+                            <Font name="System Bold" size="14"/>
+                        </font>
+                    </Label>
+                    
                     <VBox spacing="8">
-                        <Label text="Class/Degree *" styleClass="field-label">
+                        <Label text="University Name *" styleClass="field-label">
                             <font>
                                 <Font size="13"/>
                             </font>
                         </Label>
-                        <TextField fx:id="classField" promptText="Enter your current class/degree (e.g., BSc in CSE, 3rd Year)" 
+                        <TextField fx:id="universityNameField" promptText="Enter university name" 
+                                  styleClass="custom-text-field" prefHeight="40"/>
+                    </VBox>
+                    
+                    <HBox spacing="10">
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label text="Department *" styleClass="field-label">
+                                <font>
+                                    <Font size="13"/>
+                                </font>
+                            </Label>
+                            <TextField fx:id="universityDeptField" promptText="Department" 
+                                      styleClass="custom-text-field" prefHeight="40"/>
+                        </VBox>
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label text="Year *" styleClass="field-label">
+                                <font>
+                                    <Font size="13"/>
+                                </font>
+                            </Label>
+                            <TextField fx:id="universityYearField" promptText="Year (e.g. 3rd)" 
+                                      styleClass="custom-text-field" prefHeight="40"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <VBox spacing="8">
+                        <Label text="Session *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <TextField fx:id="universitySessionField" promptText="Session (e.g. 2020-21)" 
                                   styleClass="custom-text-field" prefHeight="40"/>
                     </VBox>
                 </VBox>
@@ -152,7 +234,7 @@
                     
                     <!-- Preferred Location Section -->
                     <VBox spacing="8">
-                        <Label text="Preferred Location *" styleClass="field-label">
+                        <Label text="Location *" styleClass="field-label">
                             <font>
                                 <Font size="13"/>
                             </font>
@@ -167,6 +249,39 @@
                         
                         <ComboBox fx:id="areaCombo" promptText="Area" 
                                  styleClass="custom-combo" prefHeight="40" maxWidth="Infinity"/>
+                    </VBox>
+                    
+                    <!-- Preferred Day & Time -->
+                    <HBox spacing="10">
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label text="Preferred Days *" styleClass="field-label">
+                                <font>
+                                    <Font size="13"/>
+                                </font>
+                            </Label>
+                            <TextField fx:id="preferredDayField" promptText="e.g. Sun, Tue, Thu" 
+                                      styleClass="custom-text-field" prefHeight="40"/>
+                        </VBox>
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label text="Preferred Time *" styleClass="field-label">
+                                <font>
+                                    <Font size="13"/>
+                                </font>
+                            </Label>
+                            <TextField fx:id="preferredTimeField" promptText="e.g. 4 PM - 6 PM" 
+                                      styleClass="custom-text-field" prefHeight="40"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <!-- Preferred Location (Text) -->
+                    <VBox spacing="8">
+                        <Label text="Preferred Location Details *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <TextField fx:id="preferredLocationField" promptText="Specific areas or 'Online'" 
+                                  styleClass="custom-text-field" prefHeight="40"/>
                     </VBox>
                     
                     <!-- Preferred Fee Field -->

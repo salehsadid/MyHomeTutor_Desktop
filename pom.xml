@@ -31,11 +31,18 @@
             <version>${javafx.version}</version>
         </dependency>
         
-        <!-- SQLite JDBC (for future database integration) -->
+        <!-- SQLite JDBC -->
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.42.0.0</version>
+        </dependency>
+        
+        <!-- JSON Library -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20231013</version>
         </dependency>
     </dependencies>
 
@@ -47,8 +54,12 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>15</source>
+                    <target>15</target>
+                    <compilerArgs>
+                        <arg>--add-reads</arg>
+                        <arg>com.myhometutor=ALL-UNNAMED</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
@@ -59,6 +70,10 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>com.myhometutor.Main</mainClass>
+                    <options>
+                        <option>--add-reads</option>
+                        <option>com.myhometutor=ALL-UNNAMED</option>
+                    </options>
                 </configuration>
             </plugin>
         </plugins>

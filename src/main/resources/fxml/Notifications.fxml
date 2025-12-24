@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane styleClass="root-container" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.myhometutor.controller.NotificationsController">
+    
+    <top>
+        <VBox alignment="CENTER" spacing="15" styleClass="header-section">
+            <padding>
+                <Insets bottom="20" left="30" right="30" top="20" />
+            </padding>
+            
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Button fx:id="backButton" onAction="#handleBack" styleClass="secondary-button" text="Back" />
+                
+                <Label styleClass="page-title" text="Notifications">
+                    <font>
+                        <Font name="System Bold" size="24" />
+                    </font>
+                </Label>
+                
+                <Region HBox.hgrow="ALWAYS" />
+                
+                <ToggleButton fx:id="themeToggle" onAction="#handleThemeToggle" styleClass="theme-toggle" />
+                
+                <Button fx:id="refreshButton" onAction="#handleRefresh" styleClass="primary-button" text="Refresh" />
+            </HBox>
+        </VBox>
+    </top>
+    
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-pane">
+            <VBox fx:id="notificationsContainer" spacing="15" styleClass="dashboard-container">
+                <padding>
+                    <Insets bottom="40" left="50" right="50" top="30" />
+                </padding>
+                <!-- Notifications will be added here dynamically -->
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+</BorderPane>

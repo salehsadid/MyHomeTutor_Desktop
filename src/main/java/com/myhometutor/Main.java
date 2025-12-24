@@ -1,5 +1,6 @@
 package com.myhometutor;
 
+import com.myhometutor.util.ThemeManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,15 +14,16 @@ public class Main extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/HomePage.fxml"));
             Parent root = loader.load();
-            
+
             Scene scene = new Scene(root, 800, 700);
-            
+            ThemeManager.getInstance().applyTheme(scene);
+
             primaryStage.setTitle("MyHomeTutor - Right Tutor at Right Time");
             primaryStage.setScene(scene);
             primaryStage.setMinWidth(800);
             primaryStage.setMinHeight(700);
             primaryStage.show();
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Error loading application: " + e.getMessage());
@@ -32,3 +34,4 @@ public class Main extends Application {
         launch(args);
     }
 }
+

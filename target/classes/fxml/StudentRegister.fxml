@@ -9,7 +9,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
            fx:controller="com.myhometutor.controller.StudentRegisterController"
-           styleClass="root-container" stylesheets="@../css/style.css">
+           styleClass="root-container">
     
     <top>
         <VBox alignment="CENTER" spacing="15" styleClass="header-section">
@@ -86,6 +86,24 @@
                     </VBox>
                     
                     <VBox spacing="8">
+                        <Label text="Address *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        
+                        <HBox spacing="10">
+                            <ComboBox fx:id="divisionCombo" promptText="Division" 
+                                     styleClass="custom-combo" prefHeight="40" HBox.hgrow="ALWAYS"/>
+                            <ComboBox fx:id="districtCombo" promptText="District" 
+                                     styleClass="custom-combo" prefHeight="40" HBox.hgrow="ALWAYS"/>
+                        </HBox>
+                        
+                        <ComboBox fx:id="areaCombo" promptText="Area" 
+                                 styleClass="custom-combo" prefHeight="40" maxWidth="Infinity"/>
+                    </VBox>
+
+                    <VBox spacing="8">
                         <Label text="Password *" styleClass="field-label">
                             <font>
                                 <Font size="13"/>
@@ -93,6 +111,23 @@
                         </Label>
                         <PasswordField fx:id="passwordField" promptText="Create a password" 
                                       styleClass="custom-text-field" prefHeight="40"/>
+                        
+                        <VBox spacing="2" style="-fx-padding: 5 0 0 0;">
+                            <Label fx:id="lengthCheckLabel" text="❌ Minimum 8 characters" style="-fx-text-fill: #ef4444; -fx-font-size: 11px;"/>
+                            <Label fx:id="alphaCheckLabel" text="❌ Contains alphabet" style="-fx-text-fill: #ef4444; -fx-font-size: 11px;"/>
+                            <Label fx:id="numberCheckLabel" text="❌ Contains number" style="-fx-text-fill: #ef4444; -fx-font-size: 11px;"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox spacing="8">
+                        <Label text="Confirm Password *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <PasswordField fx:id="confirmPasswordField" promptText="Confirm your password" 
+                                      styleClass="custom-text-field" prefHeight="40"/>
+                        <Label fx:id="matchCheckLabel" text="" style="-fx-font-size: 11px;"/>
                     </VBox>
                 </VBox>
                 
@@ -126,6 +161,16 @@
                         <TextField fx:id="classField" promptText="Enter your class (e.g., Class 10, SSC, HSC)" 
                                   styleClass="custom-text-field" prefHeight="40"/>
                     </VBox>
+
+                    <VBox spacing="8">
+                        <Label text="Group *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <ComboBox fx:id="groupCombo" promptText="Select Group" 
+                                  styleClass="custom-combo" prefHeight="40" maxWidth="Infinity"/>
+                    </VBox>
                 </VBox>
                 
                 <VBox spacing="20" styleClass="section-container" maxWidth="600" prefWidth="600">
@@ -133,67 +178,19 @@
                         <Insets top="25" right="35" bottom="25" left="35"/>
                     </padding>
                     
-                    <Label text="Tuition Requirements" styleClass="section-title">
+                    <Label text="Additional Information" styleClass="section-title">
                         <font>
                             <Font name="System Bold" size="18"/>
                         </font>
                     </Label>
                     
                     <VBox spacing="8">
-                        <Label text="Subject *" styleClass="field-label">
+                        <Label text="About Yourself / Notes" styleClass="field-label">
                             <font>
                                 <Font size="13"/>
                             </font>
                         </Label>
-                        <TextField fx:id="subjectField" promptText="Enter subject (e.g., Mathematics, Physics)" 
-                                  styleClass="custom-text-field" prefHeight="40"/>
-                    </VBox>
-                    
-                    <VBox spacing="8">
-                        <Label text="Location *" styleClass="field-label">
-                            <font>
-                                <Font size="13"/>
-                            </font>
-                        </Label>
-                        
-                        <HBox spacing="10">
-                            <ComboBox fx:id="divisionCombo" promptText="Division" 
-                                     styleClass="custom-combo" prefHeight="40" HBox.hgrow="ALWAYS"/>
-                            <ComboBox fx:id="districtCombo" promptText="District" 
-                                     styleClass="custom-combo" prefHeight="40" HBox.hgrow="ALWAYS"/>
-                        </HBox>
-                        
-                        <ComboBox fx:id="areaCombo" promptText="Area" 
-                                 styleClass="custom-combo" prefHeight="40" maxWidth="Infinity"/>
-                    </VBox>
-                    
-                    <VBox spacing="8">
-                        <Label text="Preferred Timing *" styleClass="field-label">
-                            <font>
-                                <Font size="13"/>
-                            </font>
-                        </Label>
-                        <TextField fx:id="timingField" promptText="Enter preferred timing (e.g., 5 PM - 7 PM)" 
-                                  styleClass="custom-text-field" prefHeight="40"/>
-                    </VBox>
-                    
-                    <VBox spacing="8">
-                        <Label text="Salary (BDT) *" styleClass="field-label">
-                            <font>
-                                <Font size="13"/>
-                            </font>
-                        </Label>
-                        <TextField fx:id="salaryField" promptText="Enter salary amount" 
-                                  styleClass="custom-text-field" prefHeight="40"/>
-                    </VBox>
-                    
-                    <VBox spacing="8">
-                        <Label text="Additional Requirements" styleClass="field-label">
-                            <font>
-                                <Font size="13"/>
-                            </font>
-                        </Label>
-                        <TextArea fx:id="requirementsArea" promptText="Enter any additional requirements or notes" 
+                        <TextArea fx:id="requirementsArea" promptText="Enter any additional information about yourself..." 
                                  styleClass="custom-text-area" prefRowCount="4" wrapText="true"/>
                     </VBox>
                 </VBox>

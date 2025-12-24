@@ -1,11 +1,15 @@
 package com.myhometutor.controller;
 
+import com.myhometutor.database.DatabaseManager;
+import com.myhometutor.model.SessionManager;
+import com.myhometutor.util.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -18,10 +22,27 @@ public class HomeController {
     @FXML private ToggleGroup userTypeGroup;
     @FXML private Button loginButton;
     @FXML private Button registerButton;
+    @FXML private ToggleButton themeToggle;
+    
+    private DatabaseManager dbManager;
+    private SessionManager sessionManager;
     
     @FXML
     private void initialize() {
         studentRadio.setSelected(true);
+        dbManager = DatabaseManager.getInstance();
+        sessionManager = SessionManager.getInstance();
+        
+        ThemeManager themeManager = ThemeManager.getInstance();
+        if (themeToggle != null) {
+            themeToggle.setSelected(themeManager.isDarkMode());
+        }
+    }
+    
+    @FXML
+    private void handleThemeToggle() {
+        ThemeManager themeManager = ThemeManager.getInstance();
+        themeManager.toggleTheme(themeToggle.getScene());
     }
     
     @FXML
@@ -30,20 +51,32 @@ public class HomeController {
         String password = passwordField.getText();
         
         if (username.isEmpty() || password.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Login Error", "Please enter both username and password.");
+            showAlert("Login Error", "Please enter both username and password.");
             return;
         }
         
         boolean isStudent = studentRadio.isSelected();
         String userType = isStudent ? "Student" : "Tutor";
         
-        // Todo: Implement database authentication logic here
-        // For now, show a  message
-        System.out.println("Login attempt - User: " + username + ", Type: " + userType);
+        JSONObject userData = null;
+        if (isStudent) {
+            userData = dbManager.authenticateStudent(username, password);
+        } else {
+            userData = dbManager.authenticateTutor(username, password);
+        }
         
-        // Placeholder: Show success message
-        showAlert(Alert.AlertType.INFORMATION, "Login", 
-                "Login functionality will be implemented soon.\n");
+        if (userData != null) {
+            sessionManager.setCurrentUser(userData, userType);
+            
+            if (isStudent) {
+                navigateToStudentDashboard();
+            } else {
+                navigateToTutorDashboard();
+            }
+        } else {
+            showAlert("Login Failed",
+                    "Invalid username or password.\nPlease try again.");
+        }
     }
     
     @FXML
@@ -62,19 +95,89 @@ public class HomeController {
             
             // Get current stage and set new scene
             Stage stage = (Stage) registerButton.getScene().getWindow();
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+            boolean maximized = stage.isMaximized();
+            boolean fullScreen = stage.isFullScreen();
+
             Scene scene = new Scene(root);
+            ThemeManager.getInstance().applyTheme(scene);
             stage.setScene(scene);
             stage.setTitle("MyHomeTutor - Registration");
             
+            // Restore dimensions
+            stage.setWidth(width);
+            stage.setHeight(height);
+            stage.setMaximized(maximized);
+            stage.setFullScreen(fullScreen);
+            
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Navigation Error", 
+            showAlert("Navigation Error",
                     "Failed to load registration page: " + e.getMessage());
         }
     }
     
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
+    private void navigateToStudentDashboard() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/StudentDashboard.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+            boolean maximized = stage.isMaximized();
+            boolean fullScreen = stage.isFullScreen();
+
+            Scene scene = new Scene(root);
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+            stage.setTitle("MyHomeTutor - Student Dashboard");
+            
+            // Restore dimensions
+            stage.setWidth(width);
+            stage.setHeight(height);
+            stage.setMaximized(maximized);
+            stage.setFullScreen(fullScreen);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Navigation Error",
+                    "Failed to load dashboard: " + e.getMessage());
+        }
+    }
+    
+    private void navigateToTutorDashboard() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/TutorDashboard.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+            boolean maximized = stage.isMaximized();
+            boolean fullScreen = stage.isFullScreen();
+
+            Scene scene = new Scene(root);
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+            stage.setTitle("MyHomeTutor - Tutor Dashboard");
+            
+            // Restore dimensions
+            stage.setWidth(width);
+            stage.setHeight(height);
+            stage.setMaximized(maximized);
+            stage.setFullScreen(fullScreen);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Navigation Error",
+                    "Failed to load tutor dashboard: " + e.getMessage());
+        }
+    }
+    
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);

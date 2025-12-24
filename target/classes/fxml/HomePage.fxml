@@ -9,11 +9,17 @@
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="com.myhometutor.controller.HomeController"
-      alignment="CENTER" spacing="30" styleClass="root-container"
-      stylesheets="@../css/style.css">
+      alignment="CENTER" spacing="30" styleClass="root-container">
+    
+    <HBox alignment="TOP_RIGHT" maxWidth="Infinity">
+        <padding>
+            <Insets right="20" top="20"/>
+        </padding>
+        <ToggleButton fx:id="themeToggle" onAction="#handleThemeToggle" styleClass="theme-toggle" />
+    </HBox>
     
     <padding>
-        <Insets top="40" right="60" bottom="40" left="60"/>
+        <Insets top="10" right="60" bottom="40" left="60"/>
     </padding>
     
     <VBox alignment="CENTER" spacing="10">
@@ -42,12 +48,12 @@
         </Label>
         
         <VBox spacing="8" styleClass="input-group">
-            <Label text="Username" styleClass="field-label">
+            <Label text="Email" styleClass="field-label">
                 <font>
                     <Font size="13"/>
                 </font>
             </Label>
-            <TextField fx:id="usernameField" promptText="Enter your username" 
+            <TextField fx:id="usernameField" promptText="Enter your email" 
                       styleClass="custom-text-field" prefHeight="45"/>
         </VBox>
         

@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane styleClass="root-container" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.myhometutor.controller.StudentDashboardController">
+    
+    <top>
+        <VBox styleClass="header-section">
+            <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-header">
+                <padding>
+                    <Insets bottom="15" left="30" right="30" top="15" />
+                </padding>
+                
+                <ImageView fitHeight="50" fitWidth="150" preserveRatio="true">
+
+                        <Image url="@../images/logo.png" />
+
+                </ImageView>
+                
+                <VBox spacing="2">
+                    <Label styleClass="app-name-label" text="MyHomeTutor">
+                        <font>
+                            <Font name="System Bold" size="18" />
+                        </font>
+                    </Label>
+                    <Label styleClass="slogan-label" text="Right Tutor at Right Time">
+                        <font>
+                            <Font size="11" />
+                        </font>
+                    </Label>
+                </VBox>
+                
+                <Region HBox.hgrow="ALWAYS" />
+                
+                <HBox alignment="CENTER_RIGHT" spacing="10">
+                    <Button fx:id="postTuitionBtn" onAction="#handlePostTuition" prefHeight="35" prefWidth="120" styleClass="header-button" text="Post Tuition">
+                        <font>
+                            <Font name="System Bold" size="13" />
+                        </font>
+                    </Button>
+                    
+                    <Button fx:id="myPostsBtn" onAction="#handleMyPosts" prefHeight="35" prefWidth="100" styleClass="header-button" text="My Posts">
+                        <font>
+                            <Font name="System Bold" size="13" />
+                        </font>
+                    </Button>
+                    
+                    <Button fx:id="editProfileBtn" onAction="#handleEditProfile" prefHeight="35" prefWidth="110" styleClass="header-button" text="Edit Profile">
+                        <font>
+                            <Font name="System Bold" size="13" />
+                        </font>
+                    </Button>
+                    
+                    <Button fx:id="notificationBtn" onAction="#handleNotifications" prefHeight="35" prefWidth="40" styleClass="header-button" text="🔔">
+                        <font>
+                            <Font size="16" />
+                        </font>
+                    </Button>
+                    
+                    <ToggleButton fx:id="themeToggle" onAction="#handleThemeToggle" styleClass="theme-toggle" />
+                    
+                    <Button fx:id="logoutBtn" onAction="#handleLogout" prefHeight="35" prefWidth="90" styleClass="logout-button" text="Logout">
+                        <font>
+                            <Font name="System Bold" size="13" />
+                        </font>
+                    </Button>
+                </HBox>
+            </HBox>
+        </VBox>
+    </top>
+    
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-pane">
+            <VBox alignment="TOP_CENTER" spacing="25" styleClass="dashboard-container">
+                <padding>
+                    <Insets bottom="40" left="50" right="50" top="40" />
+                </padding>
+                
+                <VBox alignment="CENTER" spacing="15">
+                    <StackPane>
+                        <Circle radius="70" styleClass="profile-pic-border" />
+                        <Circle fill="#0A1628" radius="68" />
+                        <ImageView fx:id="profileImageView" fitHeight="130" fitWidth="130" preserveRatio="true">
+
+                                <Image url="@../images/default-avatar.png" />
+
+                        </ImageView>
+                        <Button fx:id="changePhotoBtn" ellipsisString="Upload" onAction="#handleChangePhoto" prefHeight="30" prefWidth="30" styleClass="change-photo-btn" text="📷" translateY="50">
+                            <font>
+                                <Font size="14" />
+                            </font>
+                        </Button>
+                    </StackPane>
+                    
+                    <Label fx:id="userNameLabel" styleClass="user-name-label" text="Student Name">
+                        <font>
+                            <Font name="System Bold" size="32" />
+                        </font>
+                    </Label>
+                    
+                    <Label fx:id="userTypeLabel" styleClass="user-type-label" text="Student">
+                        <font>
+                            <Font size="15" />
+                        </font>
+                    </Label>
+                </VBox>
+                
+                <HBox alignment="TOP_CENTER" spacing="20">
+                    <VBox maxWidth="500" spacing="20" HBox.hgrow="ALWAYS">
+                        
+                        <VBox spacing="15" styleClass="info-card">
+                            <padding>
+                                <Insets bottom="25" left="30" right="30" top="25" />
+                            </padding>
+                            
+                            <Label styleClass="card-title" text="📚 Educational Details">
+                                <font>
+                                    <Font name="System Bold" size="19" />
+                                </font>
+                            </Label>
+                            
+                            <Separator styleClass="card-separator" />
+                            
+                            <HBox spacing="10">
+                                <Label prefWidth="130" styleClass="info-label-bold" text="Institute:">
+                                    <font>
+                                        <Font name="System Bold" size="14" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="instituteLabel" styleClass="info-label-value" text="-" wrapText="true">
+                                    <font>
+                                        <Font size="14" />
+                                    </font>
+                                </Label>
+                            </HBox>
+                            
+                            <HBox spacing="10">
+                                <Label prefWidth="130" styleClass="info-label-bold" text="Class/Grade:">
+                                    <font>
+                                        <Font name="System Bold" size="14" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="classLabel" styleClass="info-label-value" text="-">
+                                    <font>
+                                        <Font size="14" />
+                                    </font>
+                                </Label>
+                            </HBox>
+                            
+                            <HBox spacing="10">
+                                <Label prefWidth="130" styleClass="info-label-bold" text="Group:">
+                                    <font>
+                                        <Font name="System Bold" size="14" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="groupLabel" styleClass="info-label-value" text="-">
+                                    <font>
+                                        <Font size="14" />
+                                    </font>
+                                </Label>
+                            </HBox>
+                        </VBox>
+                        
+                        <VBox spacing="15" styleClass="info-card">
+                            <padding>
+                                <Insets bottom="25" left="30" right="30" top="25" />
+                            </padding>
+                            
+                            <Label styleClass="card-title" text="📍 Location Details">
+                                <font>
+                                    <Font name="System Bold" size="19" />
+                                </font>
+                            </Label>
+                            
+                            <Separator styleClass="card-separator" />
+                            
+                            <HBox spacing="10">
+                                <Label prefWidth="130" styleClass="info-label-bold" text="Division:">
+                                    <font>
+                                        <Font name="System Bold" size="14" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="divisionLabel" styleClass="info-label-value" text="-">
+                                    <font>
+                                        <Font size="14" />
+                                    </font>
+                                </Label>
+                            </HBox>
+                            
+                            <HBox spacing="10">
+                                <Label prefWidth="130" styleClass="info-label-bold" text="District:">
+                                    <font>
+                                        <Font name="System Bold" size="14" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="districtLabel" styleClass="info-label-value" text="-">
+                                    <font>
+                                        <Font size="14" />
+                                    </font>
+                                </Label>
+                            </HBox>
+                            
+                            <HBox spacing="10">
+                                <Label prefWidth="130" styleClass="info-label-bold" text="Area:">
+                                    <font>
+                                        <Font name="System Bold" size="14" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="areaLabel" styleClass="info-label-value" text="-">
+                                    <font>
+                                        <Font size="14" />
+                                    </font>
+                                </Label>
+                            </HBox>
+                        </VBox>
+                        
+                        <VBox spacing="15" styleClass="info-card">
+                            <padding>
+                                <Insets bottom="25" left="30" right="30" top="25" />
+                            </padding>
+                            
+                            <Label styleClass="card-title" text="📞 Contact Information">
+                                <font>
+                                    <Font name="System Bold" size="19" />
+                                </font>
+                            </Label>
+                            
+                            <Separator styleClass="card-separator" />
+                            
+                            <HBox spacing="10">
+                                <Label prefWidth="130" styleClass="info-label-bold" text="Email:">
+                                    <font>
+                                        <Font name="System Bold" size="14" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="emailLabel" styleClass="info-label-value" text="-" wrapText="true">
+                                    <font>
+                                        <Font size="14" />
+                                    </font>
+                                </Label>
+                            </HBox>
+                            
+                            <HBox spacing="10">
+                                <Label prefWidth="130" styleClass="info-label-bold" text="Phone:">
+                                    <font>
+                                        <Font name="System Bold" size="14" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="phoneLabel" styleClass="info-label-value" text="-">
+                                    <font>
+                                        <Font size="14" />
+                                    </font>
+                                </Label>
+                            </HBox>
+                        </VBox>
+
+                        <VBox spacing="15" styleClass="info-card">
+                            <padding>
+                                <Insets bottom="25" left="30" right="30" top="25" />
+                            </padding>
+                            
+                            <Label styleClass="card-title" text="📝 Additional Information">
+                                <font>
+                                    <Font name="System Bold" size="19" />
+                                </font>
+                            </Label>
+                            
+                            <Separator styleClass="card-separator" />
+                            
+                            <Label fx:id="additionalInfoLabel" styleClass="info-label-value" text="No additional information provided." wrapText="true">
+                                <font>
+                                    <Font size="14" />
+                                </font>
+                            </Label>
+                        </VBox>
+                        
+                    </VBox>
+                </HBox>
+                
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+    <bottom>
+        <HBox alignment="CENTER" styleClass="footer-section">
+            <padding>
+                <Insets bottom="15" top="15" />
+            </padding>
+            <Label styleClass="copyright-label" text="© Copyright Saleh Sadid Mir">
+                <font>
+                    <Font size="12" />
+                </font>
+            </Label>
+        </HBox>
+    </bottom>
+    
+</BorderPane>
