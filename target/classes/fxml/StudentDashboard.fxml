@@ -3,6 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.ToggleButton?>
@@ -47,24 +49,6 @@
                 <Region HBox.hgrow="ALWAYS" />
                 
                 <HBox alignment="CENTER_RIGHT" spacing="10">
-                    <Button fx:id="postTuitionBtn" onAction="#handlePostTuition" prefHeight="35" prefWidth="120" styleClass="header-button" text="Post Tuition">
-                        <font>
-                            <Font name="System Bold" size="13" />
-                        </font>
-                    </Button>
-                    
-                    <Button fx:id="myPostsBtn" onAction="#handleMyPosts" prefHeight="35" prefWidth="100" styleClass="header-button" text="My Posts">
-                        <font>
-                            <Font name="System Bold" size="13" />
-                        </font>
-                    </Button>
-                    
-                    <Button fx:id="editProfileBtn" onAction="#handleEditProfile" prefHeight="35" prefWidth="110" styleClass="header-button" text="Edit Profile">
-                        <font>
-                            <Font name="System Bold" size="13" />
-                        </font>
-                    </Button>
-                    
                     <Button fx:id="notificationBtn" onAction="#handleNotifications" prefHeight="35" prefWidth="40" styleClass="header-button" text="🔔">
                         <font>
                             <Font size="16" />
@@ -73,11 +57,19 @@
                     
                     <ToggleButton fx:id="themeToggle" onAction="#handleThemeToggle" styleClass="theme-toggle" />
                     
-                    <Button fx:id="logoutBtn" onAction="#handleLogout" prefHeight="35" prefWidth="90" styleClass="logout-button" text="Logout">
+                    <MenuButton text="Menu" styleClass="header-button" prefHeight="35" prefWidth="120">
+                        <items>
+                            <MenuItem text="Post Tuition" onAction="#handlePostTuition"/>
+                            <MenuItem text="My Posts" onAction="#handleMyPosts"/>
+                            <MenuItem text="Edit Profile" onAction="#handleEditProfile"/>
+                            <MenuItem text="Change Password" onAction="#handleChangePassword"/>
+                            <MenuItem text="Delete Account" onAction="#handleDeleteAccount"/>
+                            <MenuItem text="Logout" onAction="#handleLogout" styleClass="logout-menu-item"/>
+                        </items>
                         <font>
                             <Font name="System Bold" size="13" />
                         </font>
-                    </Button>
+                    </MenuButton>
                 </HBox>
             </HBox>
         </VBox>
@@ -92,9 +84,8 @@
                 
                 <VBox alignment="CENTER" spacing="15">
                     <StackPane>
-                        <Circle radius="70" styleClass="profile-pic-border" />
-                        <Circle fill="#0A1628" radius="68" />
-                        <ImageView fx:id="profileImageView" fitHeight="130" fitWidth="130" preserveRatio="true">
+                        <Circle fill="#5FE8D0" radius="78" />
+                        <ImageView fx:id="profileImageView" fitHeight="150" fitWidth="150" preserveRatio="true">
 
                                 <Image url="@../images/default-avatar.png" />
 
@@ -233,13 +224,26 @@
                                 <Insets bottom="25" left="30" right="30" top="25" />
                             </padding>
                             
-                            <Label styleClass="card-title" text="📞 Contact Information">
+                            <Label styleClass="card-title" text="� Personal Details">
                                 <font>
                                     <Font name="System Bold" size="19" />
                                 </font>
                             </Label>
                             
                             <Separator styleClass="card-separator" />
+                            
+                            <HBox spacing="10">
+                                <Label prefWidth="130" styleClass="info-label-bold" text="Gender:">
+                                    <font>
+                                        <Font name="System Bold" size="14" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="genderLabel" styleClass="info-label-value" text="-">
+                                    <font>
+                                        <Font size="14" />
+                                    </font>
+                                </Label>
+                            </HBox>
                             
                             <HBox spacing="10">
                                 <Label prefWidth="130" styleClass="info-label-bold" text="Email:">

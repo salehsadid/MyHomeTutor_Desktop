@@ -12,7 +12,9 @@ import java.util.Optional;
 public class EditProfileDialogController {
     
     @FXML private TextField nameField;
+    @FXML private TextField emailField;
     @FXML private TextField phoneField;
+    @FXML private ComboBox<String> genderCombo;
     
     // Student Fields
     @FXML private VBox studentFields;
@@ -55,6 +57,9 @@ public class EditProfileDialogController {
     }
     
     private void setupCombos() {
+        if (genderCombo != null) {
+            genderCombo.getItems().addAll("Male", "Female");
+        }
         if (groupCombo != null) {
             groupCombo.getItems().addAll("Science", "Commerce", "Arts");
         }
@@ -90,7 +95,9 @@ public class EditProfileDialogController {
         
         if (userData != null) {
             if (userData.has("name")) nameField.setText(userData.getString("name"));
+            if (userData.has("email")) emailField.setText(userData.getString("email"));
             if (userData.has("phone")) phoneField.setText(userData.getString("phone"));
+            if (userData.has("gender")) genderCombo.setValue(userData.getString("gender"));
             if (userData.has("division")) divisionCombo.setValue(userData.getString("division"));
             if (userData.has("district")) districtCombo.setValue(userData.getString("district"));
             if (userData.has("area")) areaCombo.setValue(userData.getString("area"));
@@ -101,13 +108,13 @@ public class EditProfileDialogController {
                 if (userData.has("class")) classField.setText(userData.getString("class"));
                 if (userData.has("group")) groupCombo.setValue(userData.getString("group"));
             } else {
-                if (userData.has("college")) collegeNameField.setText(userData.getString("college"));
+                if (userData.has("collegeName")) collegeNameField.setText(userData.getString("collegeName"));
                 if (userData.has("collegeGroup")) collegeGroupCombo.setValue(userData.getString("collegeGroup"));
                 if (userData.has("hscYear")) hscYearField.setText(userData.getString("hscYear"));
-                if (userData.has("university")) universityNameField.setText(userData.getString("university"));
-                if (userData.has("department")) universityDeptField.setText(userData.getString("department"));
-                if (userData.has("year")) universityYearField.setText(userData.getString("year"));
-                if (userData.has("session")) universitySessionField.setText(userData.getString("session"));
+                if (userData.has("universityName")) universityNameField.setText(userData.getString("universityName"));
+                if (userData.has("universityDept")) universityDeptField.setText(userData.getString("universityDept"));
+                if (userData.has("universityYear")) universityYearField.setText(userData.getString("universityYear"));
+                if (userData.has("universitySession")) universitySessionField.setText(userData.getString("universitySession"));
                 if (userData.has("preferredFee")) preferredFeeField.setText(userData.getString("preferredFee"));
                 if (userData.has("experience")) experienceField.setText(userData.getString("experience"));
                 if (userData.has("preferredDays")) preferredDayField.setText(userData.getString("preferredDays"));
@@ -189,50 +196,6 @@ public class EditProfileDialogController {
     }
     
     @FXML
-    private void handleChangePassword() {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Change Password");
-        dialog.setHeaderText("Enter your new password");
-        
-        ButtonType changeButtonType = new ButtonType("Change", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(changeButtonType, ButtonType.CANCEL);
-        
-        VBox content = new VBox(10);
-        PasswordField currentPass = new PasswordField();
-        currentPass.setPromptText("Current Password");
-        PasswordField newPass = new PasswordField();
-        newPass.setPromptText("New Password");
-        PasswordField confirmPass = new PasswordField();
-        confirmPass.setPromptText("Confirm New Password");
-        
-        content.getChildren().addAll(
-            new Label("Current Password:"), currentPass,
-            new Label("New Password:"), newPass,
-            new Label("Confirm Password:"), confirmPass
-        );
-        
-        dialog.getDialogPane().setContent(content);
-        
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == changeButtonType) {
-                if (newPass.getText().equals(confirmPass.getText())) {
-                    if (dbManager.updatePassword(sessionManager.getUserId(), userType, 
-                            currentPass.getText(), newPass.getText())) {
-                        showAlert(Alert.AlertType.INFORMATION, "Success", "Password changed successfully!");
-                    } else {
-                        showAlert(Alert.AlertType.ERROR, "Error", "Incorrect current password or update failed.");
-                    }
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Error", "New passwords do not match.");
-                }
-            }
-            return null;
-        });
-        
-        dialog.showAndWait();
-    }
-    
-    @FXML
     private void handleSave() {
         if (!validateFields()) {
             return;
@@ -241,7 +204,9 @@ public class EditProfileDialogController {
         JSONObject userData = sessionManager.getCurrentUser();
         
         userData.put("name", nameField.getText().trim());
+        userData.put("email", emailField.getText().trim());
         userData.put("phone", phoneField.getText().trim());
+        userData.put("gender", genderCombo.getValue());
         userData.put("division", divisionCombo.getValue());
         userData.put("district", districtCombo.getValue());
         userData.put("area", areaCombo.getValue());
@@ -252,13 +217,13 @@ public class EditProfileDialogController {
             userData.put("class", classField.getText().trim());
             userData.put("group", groupCombo.getValue());
         } else {
-            userData.put("college", collegeNameField.getText().trim());
+            userData.put("collegeName", collegeNameField.getText().trim());
             userData.put("collegeGroup", collegeGroupCombo.getValue());
             userData.put("hscYear", hscYearField.getText().trim());
-            userData.put("university", universityNameField.getText().trim());
-            userData.put("department", universityDeptField.getText().trim());
-            userData.put("year", universityYearField.getText().trim());
-            userData.put("session", universitySessionField.getText().trim());
+            userData.put("universityName", universityNameField.getText().trim());
+            userData.put("universityDept", universityDeptField.getText().trim());
+            userData.put("universityYear", universityYearField.getText().trim());
+            userData.put("universitySession", universitySessionField.getText().trim());
             userData.put("preferredFee", preferredFeeField.getText().trim());
             userData.put("experience", experienceField.getText().trim());
             userData.put("preferredDays", preferredDayField.getText().trim());
@@ -300,8 +265,18 @@ public class EditProfileDialogController {
             return false;
         }
         
+        if (emailField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your email.");
+            return false;
+        }
+        
         if (phoneField.getText().trim().isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your phone number.");
+            return false;
+        }
+        
+        if (genderCombo.getValue() == null) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select your gender.");
             return false;
         }
         

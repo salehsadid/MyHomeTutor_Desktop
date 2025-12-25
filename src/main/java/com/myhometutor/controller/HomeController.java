@@ -17,6 +17,8 @@ public class HomeController {
     
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
+    @FXML private TextField passwordTextField;
+    @FXML private Button togglePasswordBtn;
     @FXML private RadioButton studentRadio;
     @FXML private RadioButton tutorRadio;
     @FXML private ToggleGroup userTypeGroup;
@@ -26,6 +28,7 @@ public class HomeController {
     
     private DatabaseManager dbManager;
     private SessionManager sessionManager;
+    private boolean isPasswordVisible = false;
     
     @FXML
     private void initialize() {
@@ -33,9 +36,25 @@ public class HomeController {
         dbManager = DatabaseManager.getInstance();
         sessionManager = SessionManager.getInstance();
         
+        passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
+        
         ThemeManager themeManager = ThemeManager.getInstance();
         if (themeToggle != null) {
             themeToggle.setSelected(themeManager.isDarkMode());
+        }
+    }
+
+    @FXML
+    private void togglePasswordVisibility() {
+        isPasswordVisible = !isPasswordVisible;
+        if (isPasswordVisible) {
+            passwordTextField.setVisible(true);
+            passwordField.setVisible(false);
+            togglePasswordBtn.setText("🙈");
+        } else {
+            passwordTextField.setVisible(false);
+            passwordField.setVisible(true);
+            togglePasswordBtn.setText("👁");
         }
     }
     

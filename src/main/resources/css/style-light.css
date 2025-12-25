@@ -285,6 +285,69 @@
     -fx-text-fill: #FFA826;
 }
 
+.header-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1A2332;
+    -fx-cursor: hand;
+}
+
+/* Menu Button & Items */
+.menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1A2332;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.menu-button .label {
+    -fx-text-fill: #1A2332;
+}
+
+.menu-button .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.menu-button .arrow {
+    -fx-background-color: #1A2332;
+}
+
+.context-menu {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #00C9A7;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+    -fx-padding: 5;
+    -fx-min-width: 180px;
+}
+
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 10 15;
+}
+
+.menu-item .label {
+    -fx-text-fill: #1A2332;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.menu-item:focused {
+    -fx-background-color: rgba(0, 201, 167, 0.1);
+}
+
+.menu-item:focused .label {
+    -fx-text-fill: #00C9A7;
+}
+
+/* Notification Message */
+.notification-message {
+    -fx-text-fill: #1A2332;
+    -fx-font-size: 14px;
+}
+
 /* ScrollPane */
 .scroll-pane {
     -fx-background-color: transparent;
@@ -378,6 +441,42 @@
     -fx-border-color: #00C9A7;
 }
 
+/* MenuButton Styles */
+.menu-button.header-button .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.menu-button.header-button .arrow {
+    -fx-background-color: #00A785;
+}
+
+.menu-button.header-button:hover .arrow {
+    -fx-background-color: #00C9A7;
+}
+
+.context-menu {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 2);
+}
+
+.menu-item {
+    -fx-background-color: transparent;
+}
+
+.menu-item:focused {
+    -fx-background-color: #F0F4F8;
+}
+
+.menu-item .label {
+    -fx-text-fill: #1A2332;
+}
+
+.menu-item:focused .label {
+    -fx-text-fill: #00C9A7;
+}
+
 .logout-button {
     -fx-background-color: #FFE5ED;
     -fx-text-fill: #C7234F;
@@ -437,7 +536,6 @@
 
 .user-type-label {
     -fx-text-fill: #00C9A7;
-    -fx-font-style: italic;
 }
 
 .info-card {
@@ -520,5 +618,34 @@
     -fx-text-fill: #64748b;
     -fx-font-style: italic;
     -fx-font-size: 12px;
+}
+
+
+.logout-menu-item .label { -fx-text-fill: #ef4444; }
+
+.logout-menu-item .label { -fx-text-fill: #ef4444; }
+
+/* Profile View Premium Styling */
+.profile-header-card {
+    -fx-background-color: linear-gradient(to bottom right, #FFFFFF, #F0F9F7);
+    -fx-background-radius: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 201, 167, 0.15), 20, 0, 0, 5);
+    -fx-padding: 30;
+    -fx-alignment: center;
+    -fx-border-color: #E0F2F1;
+    -fx-border-radius: 15;
+    -fx-border-width: 1;
+}
+
+.profile-section-header {
+    -fx-background-color: linear-gradient(to right, #00C9A7, #00B896);
+    -fx-background-radius: 8 8 0 0;
+    -fx-padding: 10 15;
+}
+
+.profile-section-header .label {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
 }
 

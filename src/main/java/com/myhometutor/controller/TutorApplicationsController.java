@@ -6,6 +6,7 @@ import com.myhometutor.util.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -17,6 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -105,23 +107,79 @@ public class TutorApplicationsController {
         // Details
         VBox details = new VBox(5);
         details.getChildren().add(createDetailRow("Class:", post.optString("class", "-")));
+        details.getChildren().add(createDetailRow("Group:", post.optString("group", "-")));
+        details.getChildren().add(createDetailRow("Type:", post.optString("type", "-")));
+        details.getChildren().add(createDetailRow("Days:", post.optString("days", "-")));
         details.getChildren().add(createDetailRow("Salary:", post.optString("salary", "-") + " BDT"));
         details.getChildren().add(createDetailRow("Location:", post.optString("address", "-")));
         details.getChildren().add(createDetailRow("Applied On:", app.getString("appliedAt")));
         
-        // Footer: Student Contact (only if accepted)
-        if ("accepted".equalsIgnoreCase(status)) {
-            VBox footer = new VBox(5);
-            footer.setPadding(new Insets(10, 0, 0, 0));
-            Label contactLabel = new Label("Student Contact: " + post.optString("studentPhone", "Hidden"));
-            contactLabel.setStyle("-fx-text-fill: #22c55e; -fx-font-weight: bold;");
-            footer.getChildren().add(contactLabel);
-            card.getChildren().addAll(header, new Separator(), details, new Separator(), footer);
-        } else {
-            card.getChildren().addAll(header, new Separator(), details);
+        // Footer
+        HBox footer = new HBox(10);
+        footer.setPadding(new Insets(10, 0, 0, 0));
+        
+        if ("pending".equalsIgnoreCase(status)) {
+            Button cancelBtn = new Button("Cancel Application");
+            cancelBtn.getStyleClass().add("secondary-button");
+            cancelBtn.setStyle("-fx-text-fill: #ef4444; -fx-border-color: #ef4444;");
+            cancelBtn.setOnAction(e -> handleCancel(app.getInt("id")));
+            footer.getChildren().add(cancelBtn);
+        } else if ("accepted".equalsIgnoreCase(status)) {
+            Button viewProfileBtn = new Button("View Student Profile");
+            viewProfileBtn.getStyleClass().add("primary-button");
+            viewProfileBtn.setOnAction(e -> handleViewStudentProfile(app.getJSONObject("student")));
+            footer.getChildren().add(viewProfileBtn);
         }
         
+        card.getChildren().addAll(header, new Separator(), details, new Separator(), footer);
         return card;
+    }
+    
+    private void handleCancel(int applicationId) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Cancel Application");
+        alert.setHeaderText("Are you sure you want to cancel this application?");
+        
+        if (alert.showAndWait().get() == javafx.scene.control.ButtonType.OK) {
+            if (dbManager.cancelApplication(applicationId)) {
+                loadApplications();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to cancel application.");
+            }
+        }
+    }
+    
+    private void handleViewStudentProfile(JSONObject student) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ViewStudentProfile.fxml"));
+            Parent root = loader.load();
+            
+            ViewStudentProfileController controller = loader.getController();
+            controller.setStudentData(student);
+            // For tutors viewing students, we might want to show contact details if accepted.
+            // But the current logic in handleViewStudentProfile didn't check for status, 
+            // it was called only when status is "accepted" (see createApplicationCard).
+            // So we can assume it's accepted and show contact details.
+            controller.setShowContactDetails(true);
+            
+            Stage stage = new Stage();
+            stage.setTitle("Student Profile");
+            stage.setScene(new Scene(root));
+            
+            // Apply current theme
+            ThemeManager.getInstance().applyTheme(stage.getScene());
+            
+            // Set size to 80% of screen
+            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+            stage.setWidth(screenBounds.getWidth() * 0.8);
+            stage.setHeight(screenBounds.getHeight() * 0.8);
+            
+            stage.showAndWait();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to open student profile: " + e.getMessage());
+        }
     }
     
     private HBox createDetailRow(String label, String value) {

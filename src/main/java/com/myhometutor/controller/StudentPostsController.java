@@ -6,22 +6,21 @@ import com.myhometutor.util.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class StudentPostsController {
 
@@ -91,15 +90,28 @@ public class StudentPostsController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         
+        Button deleteBtn = new Button("Delete");
+        deleteBtn.getStyleClass().add("secondary-button");
+        deleteBtn.setStyle("-fx-text-fill: #ef4444; -fx-border-color: #ef4444; -fx-font-size: 11px; -fx-padding: 5 10;");
+        deleteBtn.setOnAction(e -> handleDeletePost(post.getInt("id")));
+        
         Label dateLabel = new Label(post.optString("createdAt", "").split(" ")[0]);
         dateLabel.getStyleClass().add("post-footer-text");
         
-        header.getChildren().addAll(subjectLabel, classLabel, spacer, dateLabel);
+        header.getChildren().addAll(subjectLabel, classLabel, spacer, deleteBtn, dateLabel);
         
         // Details
         VBox details = new VBox(5);
+        details.getChildren().add(createDetailRow("Type:", post.optString("type", "-")));
+        details.getChildren().add(createDetailRow("Group:", post.optString("group", "-")));
         details.getChildren().add(createDetailRow("Salary:", post.optString("salary", "-") + " BDT"));
         details.getChildren().add(createDetailRow("Days:", post.optString("days", "-")));
+        details.getChildren().add(createDetailRow("Hours:", post.optString("hours", "-")));
+        details.getChildren().add(createDetailRow("Timing:", post.optString("timing", "-")));
+        details.getChildren().add(createDetailRow("Location:", post.optString("address", "-")));
+        if (post.has("additional") && !post.getString("additional").isEmpty()) {
+            details.getChildren().add(createDetailRow("Note:", post.getString("additional")));
+        }
         
         // Applications Section
         VBox applicationsBox = new VBox(10);
@@ -139,20 +151,79 @@ public class StudentPostsController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         
+        Button viewProfileBtn = new Button("View Profile");
+        viewProfileBtn.getStyleClass().add("secondary-button");
+        viewProfileBtn.setStyle("-fx-font-size: 11px; -fx-padding: 5 10;");
+        viewProfileBtn.setOnAction(e -> handleViewProfile(app));
+        
         String status = app.getString("status");
         if ("pending".equalsIgnoreCase(status)) {
             Button acceptBtn = new Button("Accept");
             acceptBtn.getStyleClass().add("primary-button");
             acceptBtn.setStyle("-fx-font-size: 11px; -fx-padding: 5 10;");
             acceptBtn.setOnAction(e -> handleAccept(app, post));
-            row.getChildren().addAll(tutorInfo, spacer, acceptBtn);
+            row.getChildren().addAll(tutorInfo, spacer, viewProfileBtn, acceptBtn);
         } else {
             Label statusLabel = new Label(status.toUpperCase());
-            statusLabel.setStyle("-fx-text-fill: #166534; -fx-font-weight: bold; -fx-font-size: 11px;");
-            row.getChildren().addAll(tutorInfo, spacer, statusLabel);
+            if ("accepted".equalsIgnoreCase(status)) {
+                statusLabel.setStyle("-fx-text-fill: #22c55e; -fx-font-weight: bold; -fx-font-size: 11px;");
+            } else {
+                statusLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-weight: bold; -fx-font-size: 11px;");
+            }
+            row.getChildren().addAll(tutorInfo, spacer, viewProfileBtn, statusLabel);
         }
         
         return row;
+    }
+
+    private void handleViewProfile(JSONObject app) {
+        int tutorId = app.getInt("tutorId");
+        String status = app.getString("status");
+        boolean isAccepted = "accepted".equalsIgnoreCase(status);
+        
+        JSONObject tutor = dbManager.getTutorProfile(tutorId);
+        if (tutor == null) return;
+        
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ViewTutorProfile.fxml"));
+            Parent root = loader.load();
+            
+            ViewTutorProfileController controller = loader.getController();
+            controller.setTutorData(tutor);
+            controller.setShowContactDetails(isAccepted);
+            
+            Stage stage = new Stage();
+            stage.setTitle("Tutor Profile");
+            stage.setScene(new Scene(root));
+            
+            // Apply current theme
+            ThemeManager.getInstance().applyTheme(stage.getScene());
+            
+            // Set size to 80% of screen
+            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+            stage.setWidth(screenBounds.getWidth() * 0.8);
+            stage.setHeight(screenBounds.getHeight() * 0.8);
+            
+            stage.showAndWait();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to open tutor profile: " + e.getMessage());
+        }
+    }
+
+    private void handleDeletePost(int postId) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Post");
+        alert.setHeaderText("Are you sure you want to delete this post?");
+        
+        if (alert.showAndWait().get() == ButtonType.OK) {
+            if (dbManager.deleteTuitionPost(postId)) {
+                loadPosts();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete post.");
+            }
+        }
     }
     
     private void handleAccept(JSONObject app, JSONObject post) {

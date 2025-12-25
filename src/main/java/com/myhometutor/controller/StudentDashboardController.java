@@ -22,12 +22,8 @@ import java.nio.file.StandardCopyOption;
 
 public class StudentDashboardController {
     
-    @FXML private Button postTuitionBtn;
-    @FXML private Button myPostsBtn;
-    @FXML private Button editProfileBtn;
     @FXML private Button notificationBtn;
     @FXML private ToggleButton themeToggle;
-    @FXML private Button logoutBtn;
     @FXML private Button changePhotoBtn;
     
     @FXML private ImageView profileImageView;
@@ -42,6 +38,7 @@ public class StudentDashboardController {
     @FXML private Label districtLabel;
     @FXML private Label areaLabel;
     
+    @FXML private Label genderLabel;
     @FXML private Label emailLabel;
     @FXML private Label phoneLabel;
     @FXML private Label additionalInfoLabel;
@@ -104,7 +101,10 @@ public class StudentDashboardController {
                 areaLabel.setText(userData.getString("area"));
             }
             
-            // Set contact details
+            // Set personal details
+            if (userData.has("gender")) {
+                genderLabel.setText(userData.getString("gender"));
+            }
             if (userData.has("email")) {
                 emailLabel.setText(userData.getString("email"));
             }
@@ -186,7 +186,7 @@ public class StudentDashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PostTuition.fxml"));
             Parent root = loader.load();
             
-            Stage stage = (Stage) postTuitionBtn.getScene().getWindow();
+            Stage stage = (Stage) notificationBtn.getScene().getWindow();
             Scene scene = new Scene(root);
             themeManager.applyTheme(scene);
             stage.setScene(scene);
@@ -205,7 +205,7 @@ public class StudentDashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/StudentPosts.fxml"));
             Parent root = loader.load();
             
-            Stage stage = (Stage) myPostsBtn.getScene().getWindow();
+            Stage stage = (Stage) notificationBtn.getScene().getWindow();
             Scene scene = new Scene(root);
             themeManager.applyTheme(scene);
             stage.setScene(scene);
@@ -231,8 +231,12 @@ public class StudentDashboardController {
             Stage dialogStage = new Stage();
             dialogStage.setTitle("Edit Profile");
             dialogStage.setScene(new Scene(root));
+            
+            // Apply current theme
+            ThemeManager.getInstance().applyTheme(dialogStage.getScene());
+            
             dialogStage.setResizable(false);
-            dialogStage.initOwner(editProfileBtn.getScene().getWindow());
+            dialogStage.initOwner(notificationBtn.getScene().getWindow());
             dialogStage.showAndWait();
             
         } catch (IOException e) {
@@ -251,7 +255,27 @@ public class StudentDashboardController {
     private void handleThemeToggle() {
         themeManager.toggleTheme(themeToggle.getScene());
     }
-    
+
+    @FXML
+    private void handleChangePassword() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChangePasswordDialog.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = new Stage();
+            stage.setTitle("Change Password");
+            stage.setScene(new Scene(root));
+            
+            // Apply current theme
+            ThemeManager.getInstance().applyTheme(stage.getScene());
+            
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open change password dialog.");
+        }
+    }
+
     @FXML
     private void handleNotifications() {
         try {
@@ -291,7 +315,7 @@ public class StudentDashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/HomePage.fxml"));
             Parent root = loader.load();
             
-            Stage stage = (Stage) logoutBtn.getScene().getWindow();
+            Stage stage = (Stage) notificationBtn.getScene().getWindow();
             double width = stage.getWidth();
             double height = stage.getHeight();
             boolean maximized = stage.isMaximized();
@@ -315,6 +339,25 @@ public class StudentDashboardController {
         }
     }
     
+    @FXML
+    private void handleDeleteAccount() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Account");
+        alert.setHeaderText("Are you sure you want to delete your account?");
+        alert.setContentText("This action cannot be undone. All your data will be permanently removed.");
+
+        if (alert.showAndWait().get() == ButtonType.OK) {
+            String username = sessionManager.getUsername();
+            String userType = sessionManager.getUserType().toLowerCase();
+            
+            if (dbManager.deleteUser(username, userType)) {
+                handleLogout();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Error", "Could not delete account. Please try again.");
+            }
+        }
+    }
+
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);

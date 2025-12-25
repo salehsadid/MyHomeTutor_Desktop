@@ -17,8 +17,14 @@ public class TutorRegisterController {
     @FXML private TextField nameField;
     @FXML private TextField emailField;
     @FXML private TextField phoneField;
+    @FXML private RadioButton maleRadio;
+    @FXML private RadioButton femaleRadio;
     @FXML private PasswordField passwordField;
+    @FXML private TextField passwordTextField;
+    @FXML private Button togglePasswordBtn;
     @FXML private PasswordField confirmPasswordField;
+    @FXML private TextField confirmPasswordTextField;
+    @FXML private Button toggleConfirmPasswordBtn;
     @FXML private Label lengthCheckLabel;
     @FXML private Label alphaCheckLabel;
     @FXML private Label numberCheckLabel;
@@ -51,6 +57,9 @@ public class TutorRegisterController {
     @FXML private Button backButton;
     
     private DatabaseManager dbManager;
+    private ToggleGroup genderGroup;
+    private boolean isPasswordVisible = false;
+    private boolean isConfirmPasswordVisible = false;
     
     @FXML
     private void initialize() {
@@ -58,9 +67,44 @@ public class TutorRegisterController {
         setupDivisionListener();
         setupPasswordListener();
         
+        genderGroup = new ToggleGroup();
+        maleRadio.setToggleGroup(genderGroup);
+        femaleRadio.setToggleGroup(genderGroup);
+        
+        passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
+        confirmPasswordTextField.textProperty().bindBidirectional(confirmPasswordField.textProperty());
+        
         collegeGroupCombo.getItems().addAll("Science", "Arts", "Commerce");
         
         dbManager = DatabaseManager.getInstance();
+    }
+
+    @FXML
+    private void togglePasswordVisibility() {
+        isPasswordVisible = !isPasswordVisible;
+        if (isPasswordVisible) {
+            passwordTextField.setVisible(true);
+            passwordField.setVisible(false);
+            togglePasswordBtn.setText("🙈");
+        } else {
+            passwordTextField.setVisible(false);
+            passwordField.setVisible(true);
+            togglePasswordBtn.setText("👁");
+        }
+    }
+
+    @FXML
+    private void toggleConfirmPasswordVisibility() {
+        isConfirmPasswordVisible = !isConfirmPasswordVisible;
+        if (isConfirmPasswordVisible) {
+            confirmPasswordTextField.setVisible(true);
+            confirmPasswordField.setVisible(false);
+            toggleConfirmPasswordBtn.setText("🙈");
+        } else {
+            confirmPasswordTextField.setVisible(false);
+            confirmPasswordField.setVisible(true);
+            toggleConfirmPasswordBtn.setText("👁");
+        }
     }
 
     private void setupPasswordListener() {
@@ -244,6 +288,7 @@ public class TutorRegisterController {
         tutorData.put("name", name);
         tutorData.put("email", email);
         tutorData.put("phone", phone);
+        tutorData.put("gender", maleRadio.isSelected() ? "Male" : "Female");
         
         tutorData.put("collegeName", collegeName);
         tutorData.put("collegeGroup", collegeGroup);
@@ -298,6 +343,11 @@ public class TutorRegisterController {
         
         if (phoneField.getText().trim().isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your phone number.");
+            return false;
+        }
+        
+        if (genderGroup.getSelectedToggle() == null) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select your gender.");
             return false;
         }
 

@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToggleButton;
@@ -31,6 +32,13 @@ public class ExploreTuitionsController {
     @FXML private Button backButton;
     @FXML private Button refreshButton;
     @FXML private ToggleButton themeToggle;
+    
+    @FXML private ComboBox<String> locationFilter;
+    @FXML private ComboBox<String> salaryFilter;
+    @FXML private ComboBox<String> genderFilter;
+    @FXML private ComboBox<String> typeFilter;
+    @FXML private ComboBox<String> classFilter;
+    @FXML private ComboBox<String> subjectFilter;
 
     private DatabaseManager dbManager;
 
@@ -43,6 +51,46 @@ public class ExploreTuitionsController {
             themeToggle.setSelected(themeManager.isDarkMode());
         }
         
+        setupFilters();
+        loadPosts();
+    }
+    
+    private void setupFilters() {
+        locationFilter.getItems().addAll("Dhaka", "Chittagong", "Rajshahi", "Khulna", "Barisal", "Sylhet", "Rangpur", "Mymensingh");
+        salaryFilter.getItems().addAll("Any", "< 3000", "3000 - 5000", "5000 - 8000", "> 8000");
+        genderFilter.getItems().addAll("Any", "Male", "Female");
+        typeFilter.getItems().addAll("Any", "Online", "Offline");
+        classFilter.getItems().addAll("Any", "Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "HSC", "O Level", "A Level");
+        subjectFilter.getItems().addAll("Any", "Bangla", "English", "Math", "Physics", "Chemistry", "Biology", "ICT", "Accounting", "Economics");
+        
+        setupFilterListener(salaryFilter);
+        setupFilterListener(genderFilter);
+        setupFilterListener(typeFilter);
+        setupFilterListener(classFilter);
+        setupFilterListener(subjectFilter);
+    }
+    
+    private void setupFilterListener(ComboBox<String> combo) {
+        combo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if ("Any".equals(newVal)) {
+                combo.setValue(null);
+            }
+        });
+    }
+    
+    @FXML
+    private void applyFilters() {
+        loadPosts();
+    }
+
+    @FXML
+    private void clearFilters() {
+        locationFilter.setValue(null);
+        salaryFilter.setValue(null);
+        genderFilter.setValue(null);
+        typeFilter.setValue(null);
+        classFilter.setValue(null);
+        subjectFilter.setValue(null);
         loadPosts();
     }
     
@@ -70,8 +118,93 @@ public class ExploreTuitionsController {
 
         for (int i = 0; i < posts.length(); i++) {
             JSONObject post = posts.getJSONObject(i);
-            VBox postCard = createPostCard(post);
-            postsContainer.getChildren().add(postCard);
+            
+            if (matchesFilters(post)) {
+                VBox postCard = createPostCard(post);
+                postsContainer.getChildren().add(postCard);
+            }
+        }
+        
+        if (postsContainer.getChildren().isEmpty()) {
+             Label noPostsLabel = new Label("No tuition posts match your filters.");
+             noPostsLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 16px;");
+             postsContainer.getChildren().add(noPostsLabel);
+        }
+    }
+    
+    private boolean matchesFilters(JSONObject post) {
+        // Location
+        String location = locationFilter.getValue();
+        if (location != null && !location.isEmpty()) {
+             String postDistrict = post.optString("district", "");
+             String postArea = post.optString("area", "");
+             // Also check address field if district/area not in root (it might be in 'address' string)
+             // But DatabaseManager joins with student data, so district/area might be in student data?
+             // Wait, getAllTuitionPosts puts student data into post object?
+             // No, it puts studentName, studentPhone, studentGender.
+             // It does NOT put student address/district.
+             // However, the post itself has 'address' field.
+             // And the student has 'district'/'area'.
+             // Let's assume filtering by the text in 'address' or 'district' if available.
+             // Actually, getAllTuitionPosts only selects specific fields.
+             // I should update getAllTuitionPosts to include student location if I want to filter by it.
+             // Or rely on post 'address'.
+             String address = post.optString("address", "");
+             if (!address.toLowerCase().contains(location.toLowerCase())) {
+                 return false;
+             }
+        }
+
+        // Salary
+        String salaryRange = salaryFilter.getValue();
+        if (salaryRange != null && !salaryRange.equals("Any")) {
+            double salary = parseSalary(post.optString("salary", "0"));
+            if (salaryRange.equals("< 3000") && salary >= 3000) return false;
+            if (salaryRange.equals("3000 - 5000") && (salary < 3000 || salary > 5000)) return false;
+            if (salaryRange.equals("5000 - 8000") && (salary < 5000 || salary > 8000)) return false;
+            if (salaryRange.equals("> 8000") && salary <= 8000) return false;
+        }
+
+        // Gender
+        String gender = genderFilter.getValue();
+        if (gender != null && !gender.equals("Any")) {
+            if (!post.optString("studentGender", "").equalsIgnoreCase(gender)) {
+                return false;
+            }
+        }
+
+        // Type
+        String type = typeFilter.getValue();
+        if (type != null && !type.equals("Any")) {
+            if (!post.optString("type", "").equalsIgnoreCase(type)) {
+                return false;
+            }
+        }
+
+        // Class
+        String cls = classFilter.getValue();
+        if (cls != null && !cls.equals("Any")) {
+            if (!post.optString("class", "").equalsIgnoreCase(cls)) {
+                return false;
+            }
+        }
+
+        // Subject
+        String subject = subjectFilter.getValue();
+        if (subject != null && !subject.equals("Any")) {
+            if (!post.optString("subject", "").toLowerCase().contains(subject.toLowerCase())) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private double parseSalary(String salaryStr) {
+        try {
+            return Double.parseDouble(salaryStr.replaceAll("[^0-9.]", ""));
+        } catch (NumberFormatException e) {
+            return 0;
         }
     }
 
@@ -93,12 +226,23 @@ public class ExploreTuitionsController {
         Label dateLabel = new Label(post.optString("createdAt", "").split(" ")[0]);
         dateLabel.getStyleClass().add("post-footer-text");
         
-        header.getChildren().addAll(subjectLabel, classLabel, spacer, dateLabel);
+        String postStatus = post.optString("status", "active");
+        Label statusLabel = new Label();
+        if ("assigned".equalsIgnoreCase(postStatus)) {
+            statusLabel.setText("Unavailable");
+            statusLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-weight: bold; -fx-font-size: 12px;");
+        } else {
+            statusLabel.setText("Available");
+            statusLabel.setStyle("-fx-text-fill: #22c55e; -fx-font-weight: bold; -fx-font-size: 12px;");
+        }
+        
+        header.getChildren().addAll(subjectLabel, classLabel, spacer, statusLabel, new Label(" | "), dateLabel);
         
         // Details Grid
         VBox details = new VBox(5);
         details.getChildren().add(createDetailRow("Group:", post.optString("group", "-")));
-        details.getChildren().add(createDetailRow("Type:", post.optString("type", "-")));
+        details.getChildren().add(createDetailRow("Gender:", post.optString("studentGender", "Unknown")));
+        details.getChildren().add(createDetailRow("Type:", post.optString("type", "Offline")));
         details.getChildren().add(createDetailRow("Days:", post.optString("days", "-")));
         details.getChildren().add(createDetailRow("Timing:", post.optString("timing", "-")));
         details.getChildren().add(createDetailRow("Salary:", post.optString("salary", "-") + " BDT"));
@@ -114,11 +258,27 @@ public class ExploreTuitionsController {
         Region footerSpacer = new Region();
         HBox.setHgrow(footerSpacer, Priority.ALWAYS);
         
-        Button applyButton = new Button("Apply Now");
-        applyButton.getStyleClass().add("primary-button");
-        applyButton.setOnAction(e -> handleApply(post));
+        SessionManager sessionManager = SessionManager.getInstance();
+        int tutorId = sessionManager.getUserId();
+        int postId = post.getInt("id");
+        String status = dbManager.getApplicationStatus(tutorId, postId);
         
-        footer.getChildren().addAll(studentLabel, footerSpacer, applyButton);
+        if (status == null) {
+            Button applyButton = new Button("Apply Now");
+            applyButton.getStyleClass().add("primary-button");
+            applyButton.setOnAction(e -> handleApply(post));
+            footer.getChildren().addAll(studentLabel, footerSpacer, applyButton);
+        } else {
+            Label appStatusLabel = new Label(status.toUpperCase());
+            if ("accepted".equalsIgnoreCase(status)) {
+                appStatusLabel.setStyle("-fx-text-fill: #22c55e; -fx-font-weight: bold;");
+            } else if ("pending".equalsIgnoreCase(status)) {
+                appStatusLabel.setStyle("-fx-text-fill: #eab308; -fx-font-weight: bold;");
+            } else {
+                appStatusLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-weight: bold;");
+            }
+            footer.getChildren().addAll(studentLabel, footerSpacer, appStatusLabel);
+        }
         
         card.getChildren().addAll(header, new Separator(), details, new Separator(), footer);
         return card;

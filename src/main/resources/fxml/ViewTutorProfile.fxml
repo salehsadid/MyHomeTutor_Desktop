@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane styleClass="root-container" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.myhometutor.controller.ViewTutorProfileController">
+    
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-pane">
+            <VBox alignment="TOP_CENTER" spacing="25" styleClass="dashboard-container">
+                <padding>
+                    <Insets bottom="40" left="50" right="50" top="40" />
+                </padding>
+                
+                <VBox alignment="CENTER" spacing="15" styleClass="profile-header-card">
+                    <StackPane>
+                        <Circle fill="#5FE8D0" radius="78" />
+                        <ImageView fx:id="profileImageView" fitHeight="150" fitWidth="150" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/default-avatar.png" />
+                            </image>
+                        </ImageView>
+                    </StackPane>
+                    
+                    <Label fx:id="userNameLabel" styleClass="user-name-label" text="Tutor Name">
+                        <font>
+                            <Font name="System Bold" size="32" />
+                        </font>
+                    </Label>
+                    
+                    <Label fx:id="userTypeLabel" styleClass="user-type-label" text="Tutor">
+                        <font>
+                            <Font size="15" />
+                        </font>
+                    </Label>
+                </VBox>
+                
+                <HBox alignment="TOP_CENTER" spacing="20">
+                    <VBox maxWidth="Infinity" spacing="20" HBox.hgrow="ALWAYS">
+                        
+                        <VBox spacing="0" styleClass="info-card">
+                            <HBox styleClass="profile-section-header">
+                                <Label text="🎓 Educational Background" />
+                            </HBox>
+                            
+                            <VBox spacing="20">
+                                <padding>
+                                    <Insets bottom="25" left="30" right="30" top="25" />
+                                </padding>
+                                
+                                <VBox spacing="10">
+                                    <Label styleClass="field-label" text="College Info:">
+                                        <font>
+                                            <Font name="System Bold" size="14" />
+                                        </font>
+                                    </Label>
+                                    <HBox spacing="10">
+                                        <Label styleClass="info-label" text="Name:" minWidth="100" />
+                                        <Label fx:id="collegeNameLabel" styleClass="field-label" text="-" />
+                                    </HBox>
+                                    <HBox spacing="10">
+                                        <Label styleClass="info-label" text="Group/HSC:" minWidth="100" />
+                                        <Label fx:id="collegeGroupLabel" styleClass="field-label" text="-" />
+                                        <Label styleClass="info-label" text="|" />
+                                        <Label fx:id="hscYearLabel" styleClass="field-label" text="-" />
+                                    </HBox>
+                                </VBox>
+                                
+                                <Separator />
+                                
+                                <VBox spacing="10">
+                                    <Label styleClass="field-label" text="University Info:">
+                                        <font>
+                                            <Font name="System Bold" size="14" />
+                                        </font>
+                                    </Label>
+                                    <HBox spacing="10">
+                                        <Label styleClass="info-label" text="Name:" minWidth="100" />
+                                        <Label fx:id="universityNameLabel" styleClass="field-label" text="-" />
+                                    </HBox>
+                                    <HBox spacing="10">
+                                        <Label styleClass="info-label" text="Dept/Year:" minWidth="100" />
+                                        <Label fx:id="universityDeptLabel" styleClass="field-label" text="-" />
+                                        <Label styleClass="info-label" text="|" />
+                                        <Label fx:id="universityYearLabel" styleClass="field-label" text="-" />
+                                    </HBox>
+                                    <HBox spacing="10">
+                                        <Label styleClass="info-label" text="Session:" minWidth="100" />
+                                        <Label fx:id="universitySessionLabel" styleClass="field-label" text="-" />
+                                    </HBox>
+                                </VBox>
+                            </VBox>
+                        </VBox>
+                        
+                        <VBox spacing="0" styleClass="info-card">
+                            <HBox styleClass="profile-section-header">
+                                <Label text="🔎 Location Details" />
+                            </HBox>
+                            
+                            <VBox spacing="15">
+                                <padding>
+                                    <Insets bottom="25" left="30" right="30" top="25" />
+                                </padding>
+                                <HBox spacing="10">
+                                    <Label styleClass="info-label" text="Division:" minWidth="100" />
+                                    <Label fx:id="divisionLabel" styleClass="field-label" text="-" />
+                                </HBox>
+                                <HBox spacing="10">
+                                    <Label styleClass="info-label" text="District:" minWidth="100" />
+                                    <Label fx:id="districtLabel" styleClass="field-label" text="-" />
+                                </HBox>
+                                <HBox spacing="10">
+                                    <Label styleClass="info-label" text="Area:" minWidth="100" />
+                                    <Label fx:id="areaLabel" styleClass="field-label" text="-" />
+                                </HBox>
+                            </VBox>
+                        </VBox>
+                        
+                    </VBox>
+                    
+                    <VBox maxWidth="Infinity" spacing="20" HBox.hgrow="ALWAYS">
+                        
+                        <VBox spacing="0" styleClass="info-card">
+                            <HBox styleClass="profile-section-header">
+                                <Label text="💎 Personal Details" />
+                            </HBox>
+                            
+                            <VBox spacing="15">
+                                <padding>
+                                    <Insets bottom="25" left="30" right="30" top="25" />
+                                </padding>
+                                <HBox spacing="10">
+                                    <Label styleClass="info-label" text="Gender:" minWidth="100" />
+                                    <Label fx:id="genderLabel" styleClass="field-label" text="-" />
+                                </HBox>
+                                
+                                <VBox fx:id="contactDetailsBox" managed="false" visible="false" spacing="10">
+                                    <Separator />
+                                    <Label styleClass="field-label" text="Contact Info:">
+                                        <font>
+                                            <Font name="System Bold" size="14" />
+                                        </font>
+                                    </Label>
+                                    <HBox spacing="10">
+                                        <Label styleClass="info-label" text="Email:" minWidth="100" />
+                                        <Label fx:id="emailLabel" styleClass="field-label" text="-" />
+                                    </HBox>
+                                    <HBox spacing="10">
+                                        <Label styleClass="info-label" text="Phone:" minWidth="100" />
+                                        <Label fx:id="phoneLabel" styleClass="field-label" text="-" />
+                                    </HBox>
+                                </VBox>
+                            </VBox>
+                        </VBox>
+                        
+                        <VBox spacing="0" styleClass="info-card">
+                            <HBox styleClass="profile-section-header">
+                                <Label text="⚡ Tuition Preferences" />
+                            </HBox>
+                            
+                            <VBox spacing="15">
+                                <padding>
+                                    <Insets bottom="25" left="30" right="30" top="25" />
+                                </padding>
+                                <HBox spacing="10">
+                                    <Label styleClass="info-label" text="Expected Fee:" minWidth="120" />
+                                    <Label fx:id="preferredFeeLabel" styleClass="field-label" text="-" />
+                                </HBox>
+                                <HBox spacing="10">
+                                    <Label styleClass="info-label" text="Preferred Days:" minWidth="120" />
+                                    <Label fx:id="preferredDayLabel" styleClass="field-label" text="-" />
+                                </HBox>
+                                <HBox spacing="10">
+                                    <Label styleClass="info-label" text="Preferred Time:" minWidth="120" />
+                                    <Label fx:id="preferredTimeLabel" styleClass="field-label" text="-" />
+                                </HBox>
+                                <HBox spacing="10">
+                                    <Label styleClass="info-label" text="Preferred Area:" minWidth="120" />
+                                    <Label fx:id="preferredLocationLabel" styleClass="field-label" text="-" />
+                                </HBox>
+                                
+                                <VBox spacing="5">
+                                    <Label styleClass="info-label" text="Experience:" />
+                                    <Label fx:id="experienceLabel" styleClass="field-label" text="-" wrapText="true" />
+                                </VBox>
+                            </VBox>
+                        </VBox>
+                        
+                        <VBox spacing="0" styleClass="info-card">
+                            <HBox styleClass="profile-section-header">
+                                <Label text="📝 Additional Info" />
+                            </HBox>
+                            
+                            <VBox spacing="15">
+                                <padding>
+                                    <Insets bottom="25" left="30" right="30" top="25" />
+                                </padding>
+                                <Label fx:id="additionalInfoLabel" styleClass="field-label" text="No additional information provided." wrapText="true" />
+                            </VBox>
+                        </VBox>
+                        
+                    </VBox>
+                </HBox>
+                
+                <Button fx:id="closeButton" text="Close" onAction="#handleClose" styleClass="primary-button" />
+                
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+</BorderPane>

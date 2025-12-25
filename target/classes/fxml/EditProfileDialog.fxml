@@ -37,10 +37,20 @@
                 <Label styleClass="field-label" text="Full Name" />
                 <TextField fx:id="nameField" promptText="Enter full name" styleClass="custom-text-field" />
             </VBox>
+
+            <VBox spacing="8" styleClass="input-group">
+                <Label styleClass="field-label" text="Email Address" />
+                <TextField fx:id="emailField" promptText="Enter email" styleClass="custom-text-field" />
+            </VBox>
             
             <VBox spacing="8" styleClass="input-group">
                 <Label styleClass="field-label" text="Phone Number" />
                 <TextField fx:id="phoneField" promptText="Enter phone number" styleClass="custom-text-field" />
+            </VBox>
+
+            <VBox spacing="8" styleClass="input-group">
+                <Label styleClass="field-label" text="Gender" />
+                <ComboBox fx:id="genderCombo" promptText="Select Gender" styleClass="custom-combo" maxWidth="Infinity" />
             </VBox>
             
             <!-- Student Specific Fields -->
@@ -162,11 +172,6 @@
                 </HBox>
                 <ComboBox fx:id="areaCombo" promptText="Area" styleClass="custom-combo" maxWidth="Infinity"/>
             </VBox>
-            
-            <Separator />
-            
-            <Button fx:id="changePasswordBtn" text="Change Password" styleClass="secondary-button" 
-                    maxWidth="Infinity" onAction="#handleChangePassword"/>
             
         </VBox>
     </ScrollPane>

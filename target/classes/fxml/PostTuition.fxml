@@ -50,12 +50,12 @@
                         <!-- Row 1 -->
                         <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
                             <Label text="Subject *" styleClass="field-label"/>
-                            <TextField fx:id="subjectField" promptText="e.g. Math, Physics" styleClass="custom-text-field" prefHeight="40"/>
+                            <ComboBox fx:id="subjectCombo" promptText="Select Subject" styleClass="custom-combo" prefHeight="40" maxWidth="Infinity"/>
                         </VBox>
                         
                         <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
                             <Label text="Class/Grade *" styleClass="field-label"/>
-                            <TextField fx:id="classField" promptText="e.g. Class 10, HSC" styleClass="custom-text-field" prefHeight="40"/>
+                            <ComboBox fx:id="classCombo" promptText="Select Class" styleClass="custom-combo" prefHeight="40" maxWidth="Infinity"/>
                         </VBox>
                         
                         <!-- Row 2 -->
@@ -92,9 +92,35 @@
                         </VBox>
                         
                         <!-- Row 5 -->
-                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
-                            <Label text="Address/Location *" styleClass="field-label"/>
-                            <TextArea fx:id="addressArea" promptText="Enter detailed address" styleClass="custom-text-area" prefRowCount="2" wrapText="true"/>
+                        <VBox fx:id="locationContainer" spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
+                            <Label text="Location Details *" styleClass="field-label"/>
+                            
+                            <HBox spacing="10">
+                                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                    <Label text="Division" styleClass="field-label" style="-fx-font-size: 12px;"/>
+                                    <ComboBox fx:id="divisionCombo" promptText="Select Division" styleClass="custom-combo" maxWidth="Infinity"/>
+                                </VBox>
+                                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                    <Label text="District" styleClass="field-label" style="-fx-font-size: 12px;"/>
+                                    <ComboBox fx:id="districtCombo" promptText="Select District" styleClass="custom-combo" maxWidth="Infinity"/>
+                                </VBox>
+                            </HBox>
+                            
+                            <HBox spacing="10">
+                                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                    <Label text="Thana" styleClass="field-label" style="-fx-font-size: 12px;"/>
+                                    <ComboBox fx:id="thanaCombo" promptText="Select Thana" styleClass="custom-combo" maxWidth="Infinity"/>
+                                </VBox>
+                                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                    <Label text="Area/Street" styleClass="field-label" style="-fx-font-size: 12px;"/>
+                                    <TextField fx:id="areaField" promptText="Enter Area/Street" styleClass="custom-text-field"/>
+                                </VBox>
+                            </HBox>
+                            
+                            <VBox spacing="5">
+                                <Label text="Detailed Address" styleClass="field-label" style="-fx-font-size: 12px;"/>
+                                <TextArea fx:id="addressArea" promptText="Enter detailed address" styleClass="custom-text-area" prefRowCount="2" wrapText="true"/>
+                            </VBox>
                         </VBox>
                         
                         <!-- Row 6 -->

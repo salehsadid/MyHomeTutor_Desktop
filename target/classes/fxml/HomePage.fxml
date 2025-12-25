@@ -22,18 +22,16 @@
         <Insets top="10" right="60" bottom="40" left="60"/>
     </padding>
     
-    <VBox alignment="CENTER" spacing="10">
+    <VBox alignment="CENTER" spacing="25" styleClass="login-container" maxWidth="450" prefWidth="450">
+        <padding>
+            <Insets top="40" right="50" bottom="40" left="50"/>
+        </padding>
+        
         <ImageView fitHeight="120" fitWidth="300" preserveRatio="true">
             <image>
                 <Image url="@../images/logo.png"/>
             </image>
         </ImageView>
-    </VBox>
-    
-    <VBox alignment="CENTER" spacing="25" styleClass="login-container" maxWidth="450" prefWidth="450">
-        <padding>
-            <Insets top="40" right="50" bottom="40" left="50"/>
-        </padding>
         
         <Label text="Welcome Back" styleClass="title-label">
             <font>
@@ -63,8 +61,15 @@
                     <Font size="13"/>
                 </font>
             </Label>
-            <PasswordField fx:id="passwordField" promptText="Enter your password" 
-                          styleClass="custom-text-field" prefHeight="45"/>
+            <StackPane alignment="CENTER_RIGHT">
+                <TextField fx:id="passwordTextField" promptText="Enter your password" visible="false" styleClass="custom-text-field" prefHeight="45"/>
+                <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="custom-text-field" prefHeight="45"/>
+                <Button fx:id="togglePasswordBtn" text="👁" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #8B95A9;" onAction="#togglePasswordVisibility">
+                    <padding>
+                        <Insets right="10"/>
+                    </padding>
+                </Button>
+            </StackPane>
         </VBox>
         
         <VBox spacing="8" styleClass="input-group">

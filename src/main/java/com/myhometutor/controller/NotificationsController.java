@@ -83,11 +83,12 @@ NotificationsController {
         card.getStyleClass().add("post-card");
         card.setPadding(new Insets(15));
         card.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        card.setCursor(javafx.scene.Cursor.HAND);
         
         VBox content = new VBox(5);
         Label messageLabel = new Label(notif.getString("message"));
         messageLabel.setWrapText(true);
-        messageLabel.setStyle("-fx-font-size: 14px;");
+        messageLabel.getStyleClass().add("notification-message");
         
         Label dateLabel = new Label(notif.getString("createdAt"));
         dateLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #64748b;");
@@ -95,13 +96,64 @@ NotificationsController {
         content.getChildren().addAll(messageLabel, dateLabel);
         HBox.setHgrow(content, Priority.ALWAYS);
         
-        card.getChildren().add(content);
+        Button deleteBtn = new Button("✕");
+        deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 0 5 0 5;");
+        deleteBtn.setVisible(false);
+        
+        deleteBtn.setOnAction(e -> {
+            e.consume(); // Prevent card click
+            if (dbManager.deleteNotification(notif.getInt("id"))) {
+                notificationsContainer.getChildren().remove(card);
+                if (notificationsContainer.getChildren().isEmpty()) {
+                    Label noNotifLabel = new Label("No notifications.");
+                    noNotifLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 16px;");
+                    notificationsContainer.getChildren().add(noNotifLabel);
+                }
+            }
+        });
+        
+        card.hoverProperty().addListener((obs, oldVal, newVal) -> {
+            deleteBtn.setVisible(newVal);
+        });
+        
+        card.getChildren().addAll(content, deleteBtn);
         
         if (!notif.getBoolean("isRead")) {
             card.setStyle(card.getStyle() + "-fx-border-color: #3b82f6; -fx-border-width: 0 0 0 4;");
         }
         
+        card.setOnMouseClicked(e -> handleNotificationClick(notif));
+        
         return card;
+    }
+
+    private void handleNotificationClick(JSONObject notif) {
+        String userType = sessionManager.getUserType();
+        try {
+            String fxmlFile;
+            String title;
+            
+            if ("Student".equals(userType)) {
+                fxmlFile = "/fxml/StudentPosts.fxml";
+                title = "MyHomeTutor - My Posts";
+            } else {
+                fxmlFile = "/fxml/TutorApplications.fxml";
+                title = "MyHomeTutor - My Applications";
+            }
+            
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
+            Parent root = loader.load();
+            
+            Stage stage = (Stage) backButton.getScene().getWindow();
+            Scene scene = new Scene(root);
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+            stage.setTitle(title);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Failed to load page.");
+        }
     }
 
     @FXML

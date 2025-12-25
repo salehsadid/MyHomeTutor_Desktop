@@ -90,6 +90,19 @@
                         <TextField fx:id="phoneField" promptText="Enter your phone number" 
                                   styleClass="custom-text-field" prefHeight="40"/>
                     </VBox>
+
+                    <!-- Gender Field -->
+                    <VBox spacing="8">
+                        <Label text="Gender *" styleClass="field-label">
+                            <font>
+                                <Font size="13"/>
+                            </font>
+                        </Label>
+                        <HBox spacing="20">
+                            <RadioButton fx:id="maleRadio" text="Male" styleClass="custom-radio"/>
+                            <RadioButton fx:id="femaleRadio" text="Female" styleClass="custom-radio"/>
+                        </HBox>
+                    </VBox>
                     
                     <!-- Password Field -->
                     <VBox spacing="8">
@@ -98,8 +111,15 @@
                                 <Font size="13"/>
                             </font>
                         </Label>
-                        <PasswordField fx:id="passwordField" promptText="Create a password" 
-                                      styleClass="custom-text-field" prefHeight="40"/>
+                        <StackPane alignment="CENTER_RIGHT">
+                            <TextField fx:id="passwordTextField" promptText="Create a password" visible="false" styleClass="custom-text-field" prefHeight="40"/>
+                            <PasswordField fx:id="passwordField" promptText="Create a password" styleClass="custom-text-field" prefHeight="40"/>
+                            <Button fx:id="togglePasswordBtn" text="👁" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #8B95A9;" onAction="#togglePasswordVisibility">
+                                <padding>
+                                    <Insets right="10"/>
+                                </padding>
+                            </Button>
+                        </StackPane>
                         
                         <VBox spacing="2" style="-fx-padding: 5 0 0 0;">
                             <Label fx:id="lengthCheckLabel" text="❌ Minimum 8 characters" style="-fx-text-fill: #ef4444; -fx-font-size: 11px;"/>
@@ -115,8 +135,15 @@
                                 <Font size="13"/>
                             </font>
                         </Label>
-                        <PasswordField fx:id="confirmPasswordField" promptText="Confirm your password" 
-                                      styleClass="custom-text-field" prefHeight="40"/>
+                        <StackPane alignment="CENTER_RIGHT">
+                            <TextField fx:id="confirmPasswordTextField" promptText="Confirm your password" visible="false" styleClass="custom-text-field" prefHeight="40"/>
+                            <PasswordField fx:id="confirmPasswordField" promptText="Confirm your password" styleClass="custom-text-field" prefHeight="40"/>
+                            <Button fx:id="toggleConfirmPasswordBtn" text="👁" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #8B95A9;" onAction="#toggleConfirmPasswordVisibility">
+                                <padding>
+                                    <Insets right="10"/>
+                                </padding>
+                            </Button>
+                        </StackPane>
                         <Label fx:id="matchCheckLabel" text="" style="-fx-font-size: 11px;"/>
                     </VBox>
                 </VBox>
@@ -199,7 +226,7 @@
                                       styleClass="custom-text-field" prefHeight="40"/>
                         </VBox>
                         <VBox spacing="8" HBox.hgrow="ALWAYS">
-                            <Label text="Year *" styleClass="field-label">
+                            <Label text="Year/Semester *" styleClass="field-label">
                                 <font>
                                     <Font size="13"/>
                                 </font>
