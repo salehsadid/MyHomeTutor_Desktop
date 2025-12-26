@@ -214,6 +214,11 @@
                     </VBox>
                 </HBox>
                 
+                <HBox fx:id="adminActionBox" alignment="CENTER" spacing="20" visible="false" managed="false">
+                    <Button text="Approve" onAction="#handleApprove" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" styleClass="primary-button"/>
+                    <Button text="Reject" onAction="#handleReject" style="-fx-background-color: #F44336; -fx-text-fill: white;" styleClass="primary-button"/>
+                </HBox>
+
                 <Button fx:id="closeButton" text="Close" onAction="#handleClose" styleClass="primary-button" />
                 
             </VBox>

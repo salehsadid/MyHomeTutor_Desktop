@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.myhometutor.controller.AdminLoginController"
+      alignment="CENTER" spacing="30" styleClass="root-container">
+    
+    <padding>
+        <Insets top="10" right="60" bottom="40" left="60"/>
+    </padding>
+    
+    <VBox alignment="CENTER" spacing="25" styleClass="login-container" maxWidth="450" prefWidth="450">
+        <padding>
+            <Insets top="40" right="50" bottom="40" left="50"/>
+        </padding>
+        
+        <Label text="Admin Login" styleClass="title-label">
+            <font>
+                <Font name="System Bold" size="28"/>
+            </font>
+        </Label>
+        
+        <VBox spacing="8" styleClass="input-group">
+            <Label text="Username" styleClass="field-label">
+                <font>
+                    <Font size="13"/>
+                </font>
+            </Label>
+            <TextField fx:id="usernameField" promptText="Enter admin username" 
+                      styleClass="custom-text-field" prefHeight="45"/>
+        </VBox>
+        
+        <VBox spacing="8" styleClass="input-group">
+            <Label text="Password" styleClass="field-label">
+                <font>
+                    <Font size="13"/>
+                </font>
+            </Label>
+            <StackPane>
+                <TextField fx:id="passwordTextField" promptText="Enter admin password" styleClass="custom-text-field" prefHeight="45" visible="false" managed="false"/>
+                <PasswordField fx:id="passwordField" promptText="Enter admin password" styleClass="custom-text-field" prefHeight="45"/>
+                <Button fx:id="togglePasswordButton" text="👁" onAction="#togglePasswordVisibility" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: gray;" StackPane.alignment="CENTER_RIGHT">
+                    <font>
+                        <Font size="16"/>
+                    </font>
+                    <padding>
+                        <Insets right="10" left="10"/>
+                    </padding>
+                </Button>
+            </StackPane>
+        </VBox>
+        
+        <Button text="Login" styleClass="primary-button" 
+                prefHeight="45" maxWidth="Infinity" onAction="#handleLogin">
+            <font>
+                <Font name="System Bold" size="15"/>
+            </font>
+        </Button>
+        
+        <Button text="Back to Home" styleClass="link-button" onAction="#handleBack" />
+    </VBox>
+    
+</VBox>

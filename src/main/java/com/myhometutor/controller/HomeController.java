@@ -65,6 +65,26 @@ public class HomeController {
     }
     
     @FXML
+    private void handleAdminLogin() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminLogin.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            
+            // Preserve current size
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+            
+            Scene scene = new Scene(root, width, height);
+            ThemeManager.getInstance().applyTheme(scene);
+            
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     private void handleLogin() {
         String username = usernameField.getText().trim();
         String password = passwordField.getText();

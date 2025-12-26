@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.json.JSONObject;
 
@@ -38,11 +39,18 @@ public class StudentRegisterController {
     @FXML private TextArea requirementsArea;
     @FXML private Button registerButton;
     @FXML private Button backButton;
-    
+
+    @FXML private Button verifyEmailButton;
+    @FXML private Label emailVerifiedLabel;
+    @FXML private HBox otpBox;
+    @FXML private TextField otpField;
+
     private DatabaseManager dbManager;
     private ToggleGroup genderGroup;
     private boolean isPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
+    private String generatedOTP;
+    private boolean isEmailVerified = false;
     
     @FXML
     private void initialize() {
@@ -275,6 +283,48 @@ public class StudentRegisterController {
         }
     }
     
+    @FXML
+    private void handleVerifyEmail() {
+        String email = emailField.getText().trim();
+        if (email.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Please enter an email address.");
+            return;
+        }
+        if (!isValidEmail(email)) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Please enter a valid email address.");
+            return;
+        }
+
+        generatedOTP = com.myhometutor.util.EmailService.generateOTP();
+        boolean sent = com.myhometutor.util.EmailService.sendOTP(email, generatedOTP);
+
+        if (sent) {
+            otpBox.setVisible(true);
+            otpBox.setManaged(true);
+            verifyEmailButton.setDisable(true);
+            emailField.setDisable(true);
+            showAlert(Alert.AlertType.INFORMATION, "Success", "OTP sent to your email. Please check and enter it.");
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to send OTP. Please check your internet connection or email address.");
+        }
+    }
+
+    @FXML
+    private void handleConfirmOTP() {
+        String enteredOTP = otpField.getText().trim();
+        if (enteredOTP.equals(generatedOTP)) {
+            isEmailVerified = true;
+            otpBox.setVisible(false);
+            otpBox.setManaged(false);
+            emailVerifiedLabel.setVisible(true);
+            verifyEmailButton.setVisible(false);
+            verifyEmailButton.setManaged(false);
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Email verified successfully!");
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Error", "Invalid OTP. Please try again.");
+        }
+    }
+
     private boolean validateFields() {
         if (nameField.getText().trim().isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your full name.");
@@ -288,6 +338,11 @@ public class StudentRegisterController {
         
         if (!isValidEmail(emailField.getText().trim())) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter a valid email address.");
+            return false;
+        }
+
+        if (!isEmailVerified) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please verify your email address.");
             return false;
         }
         

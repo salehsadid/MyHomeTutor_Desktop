@@ -2,6 +2,8 @@ package com.myhometutor.database;
 
 import org.json.JSONObject;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseManager {
     
@@ -101,7 +103,12 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 // Column likely already exists, ignore
             }
-
+            // Attempt to add is_verified column to tutors if it doesn't exist
+            try {
+                stmt.execute("ALTER TABLE tutors ADD COLUMN is_verified INTEGER DEFAULT 0");
+            } catch (SQLException e) {
+                // Column likely already exists
+            }
             stmt.close();
             System.out.println("Database tables initialized successfully.");
             
@@ -783,5 +790,125 @@ public class DatabaseManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    // Admin Methods
+    
+    public int getTotalStudents() {
+        String sql = "SELECT COUNT(*) FROM students";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getTotalTutors() {
+        String sql = "SELECT COUNT(*) FROM tutors";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getActivePostsCount() {
+        String sql = "SELECT COUNT(*) FROM tuition_posts WHERE status = 'active'";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getPendingTutorsCount() {
+        String sql = "SELECT COUNT(*) FROM tutors WHERE is_verified = 0";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public void verifyTutor(int tutorId, boolean isApproved) {
+        String sql = "UPDATE tutors SET is_verified = ? WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, isApproved ? 1 : -1); // 1 for verified, -1 for rejected
+            pstmt.setInt(2, tutorId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public List<JSONObject> getPendingTutors() {
+        List<JSONObject> tutors = new ArrayList<>();
+        String sql = "SELECT id, username, data FROM tutors WHERE is_verified = 0";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                JSONObject tutor = new JSONObject(rs.getString("data"));
+                tutor.put("id", rs.getInt("id"));
+                tutor.put("username", rs.getString("username"));
+                tutors.add(tutor);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tutors;
+    }
+
+    public List<JSONObject> getAllUsers() {
+        List<JSONObject> users = new ArrayList<>();
+        
+        // Get Students
+        String studentSql = "SELECT id, username, data FROM students";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(studentSql)) {
+            while (rs.next()) {
+                JSONObject user = new JSONObject(rs.getString("data"));
+                user.put("id", rs.getInt("id"));
+                user.put("username", rs.getString("username"));
+                user.put("type", "Student");
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        // Get Tutors
+        String tutorSql = "SELECT id, username, data, is_verified FROM tutors";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(tutorSql)) {
+            while (rs.next()) {
+                JSONObject user = new JSONObject(rs.getString("data"));
+                user.put("id", rs.getInt("id"));
+                user.put("username", rs.getString("username"));
+                user.put("type", "Tutor");
+                int verified = rs.getInt("is_verified");
+                user.put("status", verified == 1 ? "Verified" : (verified == -1 ? "Rejected" : "Pending"));
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return users;
     }
 }

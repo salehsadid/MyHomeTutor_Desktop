@@ -76,8 +76,16 @@
                                 <Font size="13"/>
                             </font>
                         </Label>
-                        <TextField fx:id="emailField" promptText="Enter your email" 
-                                  styleClass="custom-text-field" prefHeight="40"/>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <TextField fx:id="emailField" promptText="Enter your email" 
+                                      styleClass="custom-text-field" prefHeight="40" HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="verifyEmailButton" text="Verify" onAction="#handleVerifyEmail" styleClass="secondary-button" prefHeight="40"/>
+                            <Label fx:id="emailVerifiedLabel" text="✓" textFill="green" visible="false" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                        </HBox>
+                        <HBox fx:id="otpBox" spacing="10" alignment="CENTER_LEFT" visible="false" managed="false">
+                             <TextField fx:id="otpField" promptText="Enter OTP" styleClass="custom-text-field" prefHeight="40" prefWidth="150"/>
+                             <Button text="Confirm" onAction="#handleConfirmOTP" styleClass="primary-button" prefHeight="40"/>
+                        </HBox>
                     </VBox>
                     
                     <!-- Phone Field -->

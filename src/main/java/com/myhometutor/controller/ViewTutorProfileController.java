@@ -1,11 +1,13 @@
 package com.myhometutor.controller;
 
 import com.myhometutor.util.ThemeManager;
+import com.myhometutor.database.DatabaseManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import org.json.JSONObject;
@@ -49,6 +51,9 @@ public class ViewTutorProfileController {
     @FXML private Label additionalInfoLabel;
     
     @FXML private Button closeButton;
+    @FXML private HBox adminActionBox;
+
+    private int tutorId;
 
     @FXML
     private void initialize() {
@@ -156,5 +161,32 @@ public class ViewTutorProfileController {
     public void setShowContactDetails(boolean show) {
         contactDetailsBox.setVisible(show);
         contactDetailsBox.setManaged(show);
+    }
+
+    public void setTutorId(int id) {
+        this.tutorId = id;
+    }
+
+    public void setAdminMode(boolean isAdmin) {
+        if (isAdmin) {
+            adminActionBox.setVisible(true);
+            adminActionBox.setManaged(true);
+            setShowContactDetails(true); // Admin sees contact info
+        } else {
+            adminActionBox.setVisible(false);
+            adminActionBox.setManaged(false);
+        }
+    }
+
+    @FXML
+    private void handleApprove() {
+        DatabaseManager.getInstance().verifyTutor(tutorId, true);
+        handleClose();
+    }
+
+    @FXML
+    private void handleReject() {
+        DatabaseManager.getInstance().verifyTutor(tutorId, false);
+        handleClose();
     }
 }

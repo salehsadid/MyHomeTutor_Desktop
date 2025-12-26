@@ -119,12 +119,13 @@
     
     <Region VBox.vgrow="ALWAYS"/>
     
-    <HBox alignment="CENTER">
+    <VBox alignment="CENTER" spacing="5">
+        <Button text="Are you admin?" styleClass="link-button" onAction="#handleAdminLogin" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
         <Label text="© Copyright Saleh Sadid Mir" styleClass="copyright-label">
             <font>
                 <Font size="11"/>
             </font>
         </Label>
-    </HBox>
+    </VBox>
     
 </VBox>

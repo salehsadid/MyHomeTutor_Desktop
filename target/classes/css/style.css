@@ -640,3 +640,39 @@
     -fx-font-weight: bold;
     -fx-font-size: 16px;
 }
+
+/* Admin Dashboard */
+.admin-sidebar {
+    -fx-background-color: rgba(13, 27, 46, 0.9);
+    -fx-padding: 20;
+}
+
+.sidebar-title {
+    -fx-text-fill: #5FE8D0;
+}
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #E0E7FF;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-card {
+    -fx-background-color: rgba(13, 27, 46, 0.7);
+    -fx-padding: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 0);
+    -fx-background-radius: 5;
+}
+
+.dashboard-metric-label {
+    -fx-text-fill: #E0E7FF;
+}
+
+.dashboard-metric-value {
+    -fx-text-fill: #5FE8D0;
+}
+
