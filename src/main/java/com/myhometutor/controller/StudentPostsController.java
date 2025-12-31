@@ -56,6 +56,40 @@ public class StudentPostsController {
         loadPosts();
     }
 
+    public void filterByPostId(int postId) {
+        postsContainer.getChildren().clear();
+        int studentId = sessionManager.getUserId();
+        JSONArray posts = dbManager.getStudentPosts(studentId);
+
+        // Add a "Show All" button
+        Button showAllBtn = new Button("← Show All Posts");
+        showAllBtn.setOnAction(e -> loadPosts());
+        showAllBtn.getStyleClass().add("action-button");
+        showAllBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #3b82f6; -fx-border-color: #3b82f6; -fx-border-radius: 5;");
+        HBox buttonContainer = new HBox(showAllBtn);
+        buttonContainer.setPadding(new Insets(0, 0, 10, 0));
+        postsContainer.getChildren().add(buttonContainer);
+
+        boolean found = false;
+        for (int i = 0; i < posts.length(); i++) {
+            JSONObject post = posts.getJSONObject(i);
+            if (post.getInt("id") == postId) {
+                VBox postCard = createPostCard(post);
+                // Highlight it
+                postCard.setStyle(postCard.getStyle() + "-fx-border-color: #3b82f6; -fx-border-width: 2;");
+                postsContainer.getChildren().add(postCard);
+                found = true;
+                break; 
+            }
+        }
+        
+        if (!found) {
+            Label label = new Label("Post details not found.");
+            label.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 14px;");
+            postsContainer.getChildren().add(label);
+        }
+    }
+
     private void loadPosts() {
         postsContainer.getChildren().clear();
         int studentId = sessionManager.getUserId();
@@ -232,7 +266,7 @@ public class StudentPostsController {
             // Notify Tutor
             String studentName = sessionManager.getCurrentUser().getString("name");
             String message = "Congratulations! Student " + studentName + " has accepted your application for " + post.getString("subject") + ".";
-            dbManager.createNotification(app.getInt("tutorId"), "Tutor", message);
+            dbManager.createNotification(app.getInt("tutorId"), "Tutor", message, app.getInt("id"), "application");
             
             showAlert(Alert.AlertType.INFORMATION, "Success", "Application accepted!");
             loadPosts(); // Refresh

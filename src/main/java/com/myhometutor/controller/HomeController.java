@@ -105,6 +105,18 @@ public class HomeController {
         }
         
         if (userData != null) {
+            String status = userData.optString("status", "pending");
+            if ("banned".equalsIgnoreCase(status)) {
+                showAlert("Account Banned", 
+                    "Your account has been banned due to policy violations.\nPlease contact admin for support.");
+                return;
+            }
+            if ("pending".equalsIgnoreCase(status)) {
+                showAlert("Account Verification Pending", 
+                    "Your account is currently under review.\nPlease wait for admin verification.");
+                return;
+            }
+            
             sessionManager.setCurrentUser(userData, userType);
             
             if (isStudent) {

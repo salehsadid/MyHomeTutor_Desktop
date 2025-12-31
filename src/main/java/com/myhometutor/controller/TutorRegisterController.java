@@ -7,14 +7,23 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 
 public class TutorRegisterController {
     
+    @FXML private ImageView profileImageView;
     @FXML private TextField nameField;
     @FXML private TextField emailField;
     @FXML private TextField phoneField;
@@ -29,6 +38,8 @@ public class TutorRegisterController {
     @FXML private Label lengthCheckLabel;
     @FXML private Label alphaCheckLabel;
     @FXML private Label numberCheckLabel;
+    @FXML private Label caseCheckLabel;
+    @FXML private Label symbolCheckLabel;
     @FXML private Label matchCheckLabel;
 
     @FXML private Button verifyEmailButton;
@@ -50,6 +61,7 @@ public class TutorRegisterController {
     @FXML private ComboBox<String> divisionCombo;
     @FXML private ComboBox<String> districtCombo;
     @FXML private ComboBox<String> areaCombo;
+    @FXML private ComboBox<String> classComboBox;
     
     // Tuition Preferences
     @FXML private TextField preferredFeeField;
@@ -68,7 +80,36 @@ public class TutorRegisterController {
     private boolean isConfirmPasswordVisible = false;
     private String generatedOTP;
     private boolean isEmailVerified = false;
+    private File selectedProfilePicture;
     
+    @FXML
+    private void handleProfilePictureUpload() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Profile Picture");
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
+        );
+        
+        Stage stage = (Stage) registerButton.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(stage);
+        
+        if (file != null) {
+            selectedProfilePicture = file;
+            try {
+                Image image = new Image(new FileInputStream(file));
+                profileImageView.setImage(image);
+                
+                // Optional: Add a circular clip
+                javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(50, 50, 50);
+                profileImageView.setClip(clip);
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to load image.");
+            }
+        }
+    }
+
     @FXML
     private void initialize() {
         populateDivisions();
@@ -83,6 +124,12 @@ public class TutorRegisterController {
         confirmPasswordTextField.textProperty().bindBidirectional(confirmPasswordField.textProperty());
         
         collegeGroupCombo.getItems().addAll("Science", "Arts", "Commerce");
+        
+        classComboBox.getItems().addAll(
+            "Class 1", "Class 2", "Class 3", "Class 4", "Class 5", 
+            "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", 
+            "Inter First Year", "Inter Second Year", "Admission"
+        );
         
         dbManager = DatabaseManager.getInstance();
     }
@@ -148,10 +195,14 @@ public class TutorRegisterController {
         boolean lengthValid = password.length() >= 8;
         boolean alphaValid = password.matches(".*[a-zA-Z].*");
         boolean numberValid = password.matches(".*\\d.*");
+        boolean caseValid = password.matches(".*[a-z].*") && password.matches(".*[A-Z].*");
+        boolean symbolValid = password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
 
         updateValidationLabel(lengthCheckLabel, lengthValid, "Minimum 8 characters");
         updateValidationLabel(alphaCheckLabel, alphaValid, "Contains alphabet");
         updateValidationLabel(numberCheckLabel, numberValid, "Contains number");
+        updateValidationLabel(caseCheckLabel, caseValid, "Mixed case (upper & lower)");
+        updateValidationLabel(symbolCheckLabel, symbolValid, "Contains symbol");
     }
 
     private void updateValidationLabel(Label label, boolean isValid, String text) {
@@ -276,6 +327,7 @@ public class TutorRegisterController {
         String district = districtCombo.getValue();
         String area = areaCombo.getValue();
         
+        String preferredClass = classComboBox.getValue();
         String preferredFee = preferredFeeField.getText().trim();
         String experience = experienceField.getText().trim();
         String preferredDay = preferredDayField.getText().trim();
@@ -285,14 +337,44 @@ public class TutorRegisterController {
         String additionalInfo = additionalInfoArea.getText().trim();
         
         // Check if username already exists
-        if (dbManager.usernameExists(email, "Tutor")) {
+        String existingStatus = dbManager.getUserStatus(email, "Tutor");
+        if (existingStatus != null && !existingStatus.equals("rejected")) {
             showAlert(Alert.AlertType.ERROR, "Registration Error", 
                     "Email already registered. Please use a different email.");
             return;
         }
         
+        // Save profile picture if selected
+        String profilePicturePath = "";
+        if (selectedProfilePicture != null) {
+            try {
+                File profilePicsDir = new File("profile_pictures");
+                if (!profilePicsDir.exists()) {
+                    profilePicsDir.mkdirs();
+                }
+                
+                String extension = "";
+                int i = selectedProfilePicture.getName().lastIndexOf('.');
+                if (i > 0) {
+                    extension = selectedProfilePicture.getName().substring(i);
+                }
+                
+                String fileName = "tutor_" + UUID.randomUUID().toString() + extension;
+                File destFile = new File(profilePicsDir, fileName);
+                
+                Files.copy(selectedProfilePicture.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                profilePicturePath = destFile.getAbsolutePath();
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
         // Create JSON object with tutor data
         JSONObject tutorData = new JSONObject();
+        if (!profilePicturePath.isEmpty()) {
+            tutorData.put("profilePicture", profilePicturePath);
+        }
         tutorData.put("name", name);
         tutorData.put("email", email);
         tutorData.put("phone", phone);
@@ -311,6 +393,7 @@ public class TutorRegisterController {
         tutorData.put("district", district);
         tutorData.put("area", area);
         
+        tutorData.put("preferredClass", preferredClass);
         tutorData.put("preferredFee", preferredFee);
         tutorData.put("experience", experience);
         tutorData.put("preferredDay", preferredDay);
@@ -318,18 +401,30 @@ public class TutorRegisterController {
         tutorData.put("preferredLocation", preferredLocation);
         
         tutorData.put("additionalInfo", additionalInfo);
+        tutorData.put("password", password); // Temporarily store password to pass to next screen
         
-        // Register tutor in database
-        boolean success = dbManager.registerTutor(email, password, tutorData);
-        
-        if (success) {
-            showAlert(Alert.AlertType.INFORMATION, "Registration Successful", 
-                    "Tutor account created successfully!\n" +
-                    "You can now login with your email and password.");
-            handleBack();
-        } else {
-            showAlert(Alert.AlertType.ERROR, "Registration Failed", 
-                    "Failed to create account. Please try again.");
+        navigateToDocumentUpload(tutorData, "Tutor");
+    }
+
+    private void navigateToDocumentUpload(JSONObject data, String userType) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/DocumentUpload.fxml"));
+            Parent root = loader.load();
+            
+            DocumentUploadController controller = loader.getController();
+            controller.setRegistrationData(data, userType);
+            
+            Stage stage = (Stage) registerButton.getScene().getWindow();
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+            
+            Scene scene = new Scene(root, width, height);
+            ThemeManager.getInstance().applyTheme(scene);
+            
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Failed to load document upload page.");
         }
     }
     
@@ -414,7 +509,9 @@ public class TutorRegisterController {
             return false;
         }
 
-        if (password.length() < 8 || !password.matches(".*[a-zA-Z].*") || !password.matches(".*\\d.*")) {
+        if (password.length() < 8 || !password.matches(".*[a-zA-Z].*") || !password.matches(".*\\d.*") || 
+            !password.matches(".*[a-z].*") || !password.matches(".*[A-Z].*") || 
+            !password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*")) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Password does not meet all requirements.");
             return false;
         }
@@ -461,6 +558,11 @@ public class TutorRegisterController {
         
         if (divisionCombo.getValue() == null || districtCombo.getValue() == null || areaCombo.getValue() == null) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select complete location (Division, District, Area).");
+            return false;
+        }
+        
+        if (classComboBox.getValue() == null) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select your preferred class.");
             return false;
         }
         

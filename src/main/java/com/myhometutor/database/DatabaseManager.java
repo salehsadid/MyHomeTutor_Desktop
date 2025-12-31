@@ -38,6 +38,7 @@ public class DatabaseManager {
                     username TEXT UNIQUE NOT NULL,
                     password TEXT NOT NULL,
                     data TEXT NOT NULL,
+                    status TEXT DEFAULT 'pending',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """;
@@ -49,6 +50,7 @@ public class DatabaseManager {
                     username TEXT UNIQUE NOT NULL,
                     password TEXT NOT NULL,
                     data TEXT NOT NULL,
+                    status TEXT DEFAULT 'pending',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """;
@@ -59,7 +61,7 @@ public class DatabaseManager {
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     student_id INTEGER NOT NULL,
                     data TEXT NOT NULL,
-                    status TEXT DEFAULT 'active',
+                    status TEXT DEFAULT 'pending',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (student_id) REFERENCES students(id)
                 )
@@ -87,6 +89,22 @@ public class DatabaseManager {
                     user_type TEXT NOT NULL,
                     message TEXT NOT NULL,
                     is_read INTEGER DEFAULT 0,
+                    reference_id INTEGER,
+                    reference_type TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """;
+
+            // Reports table
+            String createReportsTable = """
+                CREATE TABLE IF NOT EXISTS reports (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    reporter_id INTEGER NOT NULL,
+                    reporter_type TEXT NOT NULL,
+                    reported_id INTEGER NOT NULL,
+                    reported_type TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    status TEXT DEFAULT 'pending',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """;
@@ -96,6 +114,7 @@ public class DatabaseManager {
             stmt.execute(createTuitionPostsTable);
             stmt.execute(createApplicationsTable);
             stmt.execute(createNotificationsTable);
+            stmt.execute(createReportsTable);
             
             // Attempt to add is_profile_revealed column if it doesn't exist (for existing DBs)
             try {
@@ -109,6 +128,23 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 // Column likely already exists
             }
+
+            // Attempt to add status column to students if it doesn't exist
+            try {
+                stmt.execute("ALTER TABLE students ADD COLUMN status TEXT DEFAULT 'pending'");
+            } catch (SQLException e) {
+                // Column likely already exists
+            }
+
+            // Attempt to add status column to tutors if it doesn't exist
+            try {
+                stmt.execute("ALTER TABLE tutors ADD COLUMN status TEXT DEFAULT 'pending'");
+            } catch (SQLException e) {
+                // Column likely already exists
+            }
+
+            updateNotificationsTableSchema();
+            
             stmt.close();
             System.out.println("Database tables initialized successfully.");
             
@@ -116,10 +152,35 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
+
+    private void updateNotificationsTableSchema() {
+        try (Statement stmt = connection.createStatement()) {
+            // Check if reference_id column exists
+            boolean hasReferenceId = false;
+            boolean hasReferenceType = false;
+            
+            try (ResultSet rs = stmt.executeQuery("PRAGMA table_info(notifications)")) {
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    if ("reference_id".equals(name)) hasReferenceId = true;
+                    if ("reference_type".equals(name)) hasReferenceType = true;
+                }
+            }
+            
+            if (!hasReferenceId) {
+                stmt.execute("ALTER TABLE notifications ADD COLUMN reference_id INTEGER");
+            }
+            if (!hasReferenceType) {
+                stmt.execute("ALTER TABLE notifications ADD COLUMN reference_type TEXT");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     
     // Register a new student
     public boolean registerStudent(String username, String password, JSONObject data) {
-        String sql = "INSERT INTO students (username, password, data) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO students (username, password, data, status) VALUES (?, ?, ?, 'pending')";
         
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -137,7 +198,7 @@ public class DatabaseManager {
     
     // Register a new tutor
     public boolean registerTutor(String username, String password, JSONObject data) {
-        String sql = "INSERT INTO tutors (username, password, data) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO tutors (username, password, data, status) VALUES (?, ?, ?, 'pending')";
         
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -155,7 +216,7 @@ public class DatabaseManager {
     
     // Authenticate student
     public JSONObject authenticateStudent(String username, String password) {
-        String sql = "SELECT id, data FROM students WHERE username = ? AND password = ?";
+        String sql = "SELECT id, data, status FROM students WHERE username = ? AND password = ?";
         
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -167,6 +228,7 @@ public class DatabaseManager {
                 JSONObject data = new JSONObject(rs.getString("data"));
                 data.put("id", rs.getInt("id"));
                 data.put("username", username);
+                data.put("status", rs.getString("status"));
                 return data;
             }
             
@@ -179,7 +241,7 @@ public class DatabaseManager {
     
     // Authenticate tutor
     public JSONObject authenticateTutor(String username, String password) {
-        String sql = "SELECT id, data FROM tutors WHERE username = ? AND password = ?";
+        String sql = "SELECT id, data, status FROM tutors WHERE username = ? AND password = ?";
         
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -191,6 +253,7 @@ public class DatabaseManager {
                 JSONObject data = new JSONObject(rs.getString("data"));
                 data.put("id", rs.getInt("id"));
                 data.put("username", username);
+                data.put("status", rs.getString("status"));
                 return data;
             }
             
@@ -302,10 +365,44 @@ public class DatabaseManager {
         
         return false;
     }
+
+    // Get user status by username
+    public String getUserStatus(String username, String userType) {
+        String table = userType.equals("Student") ? "students" : "tutors";
+        String sql = "SELECT status FROM " + table + " WHERE username = ?";
+        
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("status");
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+
+    // Delete user by username (used for re-registration of rejected users)
+    public boolean deleteUserByUsername(String username, String userType) {
+        String table = userType.equals("Student") ? "students" : "tutors";
+        String sql = "DELETE FROM " + table + " WHERE username = ?";
+        
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     
     // Create a new tuition post
     public boolean createTuitionPost(int studentId, JSONObject postData) {
-        String sql = "INSERT INTO tuition_posts (student_id, data) VALUES (?, ?)";
+        String sql = "INSERT INTO tuition_posts (student_id, data, status) VALUES (?, ?, 'pending')";
         
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, studentId);
@@ -326,7 +423,7 @@ public class DatabaseManager {
         String sql = "SELECT tp.id, tp.student_id, tp.data, tp.status, tp.created_at, s.data as student_data " +
                      "FROM tuition_posts tp " +
                      "JOIN students s ON tp.student_id = s.id " +
-                     "WHERE tp.status IN ('active', 'assigned') " +
+                     "WHERE tp.status = 'active' " +
                      "ORDER BY tp.created_at DESC";
         
         try (Statement stmt = connection.createStatement();
@@ -352,6 +449,37 @@ public class DatabaseManager {
         }
         
         return posts;
+    }
+
+    // Get a single tuition post by ID
+    public JSONObject getTuitionPost(int postId) {
+        String sql = "SELECT tp.id, tp.student_id, tp.data, tp.status, tp.created_at, s.data as student_data " +
+                     "FROM tuition_posts tp " +
+                     "JOIN students s ON tp.student_id = s.id " +
+                     "WHERE tp.id = ?";
+        
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, postId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    JSONObject post = new JSONObject(rs.getString("data"));
+                    post.put("id", rs.getInt("id"));
+                    post.put("studentId", rs.getInt("student_id"));
+                    post.put("status", rs.getString("status"));
+                    post.put("createdAt", rs.getString("created_at"));
+                    
+                    JSONObject studentData = new JSONObject(rs.getString("student_data"));
+                    post.put("studentName", studentData.optString("name", "Unknown"));
+                    post.put("studentPhone", studentData.optString("phone", ""));
+                    post.put("studentGender", studentData.optString("gender", "Unknown"));
+                    
+                    return post;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
     // Update password with verification
@@ -418,7 +546,7 @@ public class DatabaseManager {
     // Get applications for a tutor
     public org.json.JSONArray getTutorApplications(int tutorId) {
         org.json.JSONArray applications = new org.json.JSONArray();
-        String sql = "SELECT a.id, a.status, a.created_at, a.is_profile_revealed, tp.data as post_data, s.data as student_data " +
+        String sql = "SELECT a.id, a.status, a.created_at, a.is_profile_revealed, tp.data as post_data, s.id as student_id, s.data as student_data " +
                      "FROM applications a " +
                      "JOIN tuition_posts tp ON a.tuition_post_id = tp.id " +
                      "JOIN students s ON tp.student_id = s.id " +
@@ -437,6 +565,9 @@ public class DatabaseManager {
                 
                 JSONObject postData = new JSONObject(rs.getString("post_data"));
                 JSONObject studentData = new JSONObject(rs.getString("student_data"));
+                
+                // Add student ID to student data
+                studentData.put("id", rs.getInt("student_id"));
                 
                 postData.put("studentName", studentData.optString("name", "Unknown"));
                 postData.put("studentPhone", studentData.optString("phone", ""));
@@ -563,11 +694,25 @@ public class DatabaseManager {
 
     // Create notification
     public void createNotification(int userId, String userType, String message) {
-        String sql = "INSERT INTO notifications (user_id, user_type, message) VALUES (?, ?, ?)";
+        createNotification(userId, userType, message, 0, null);
+    }
+
+    public void createNotification(int userId, String userType, String message, int referenceId, String referenceType) {
+        String sql = "INSERT INTO notifications (user_id, user_type, message, reference_id, reference_type) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             pstmt.setString(2, userType);
             pstmt.setString(3, message);
+            if (referenceId > 0) {
+                pstmt.setInt(4, referenceId);
+            } else {
+                pstmt.setNull(4, Types.INTEGER);
+            }
+            if (referenceType != null) {
+                pstmt.setString(5, referenceType);
+            } else {
+                pstmt.setNull(5, Types.VARCHAR);
+            }
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -605,7 +750,7 @@ public class DatabaseManager {
     // Get user notifications
     public org.json.JSONArray getUserNotifications(int userId, String userType) {
         org.json.JSONArray notifications = new org.json.JSONArray();
-        String sql = "SELECT id, message, is_read, created_at FROM notifications " +
+        String sql = "SELECT id, message, is_read, reference_id, reference_type, created_at FROM notifications " +
                      "WHERE user_id = ? AND user_type = ? ORDER BY created_at DESC";
         
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -618,6 +763,8 @@ public class DatabaseManager {
                 notif.put("id", rs.getInt("id"));
                 notif.put("message", rs.getString("message"));
                 notif.put("isRead", rs.getInt("is_read") == 1);
+                notif.put("referenceId", rs.getInt("reference_id"));
+                notif.put("referenceType", rs.getString("reference_type"));
                 notif.put("createdAt", rs.getString("created_at"));
                 notifications.put(notif);
             }
@@ -634,7 +781,9 @@ public class DatabaseManager {
             ResultSet rs = pstmt.executeQuery();
             
             if (rs.next()) {
-                return new JSONObject(rs.getString("data"));
+                JSONObject data = new JSONObject(rs.getString("data"));
+                data.put("id", tutorId);
+                return data;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -820,6 +969,84 @@ public class DatabaseManager {
         return 0;
     }
 
+    public int getTotalTuitionPosts() {
+        String sql = "SELECT COUNT(*) FROM tuition_posts";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getPendingTuitionPostsCount() {
+        String sql = "SELECT COUNT(*) FROM tuition_posts WHERE status = 'pending'";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getApprovedTuitionPostsCount() {
+        String sql = "SELECT COUNT(*) FROM tuition_posts WHERE status IN ('active', 'assigned')";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getPendingStudentVerificationsCount() {
+        String sql = "SELECT COUNT(*) FROM students WHERE status = 'pending'";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getPendingTutorVerificationsCount() {
+        String sql = "SELECT COUNT(*) FROM tutors WHERE status = 'pending'";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getTotalConnectionsCount() {
+        String sql = "SELECT COUNT(*) FROM applications WHERE status = 'accepted'";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public int getActivePostsCount() {
         String sql = "SELECT COUNT(*) FROM tuition_posts WHERE status = 'active'";
         try (Statement stmt = connection.createStatement();
@@ -834,26 +1061,32 @@ public class DatabaseManager {
     }
 
     public int getPendingTutorsCount() {
-        String sql = "SELECT COUNT(*) FROM tutors WHERE is_verified = 0";
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
+        return getPendingTutorVerificationsCount();
     }
 
     public void verifyTutor(int tutorId, boolean isApproved) {
-        String sql = "UPDATE tutors SET is_verified = ? WHERE id = ?";
+        String sql = "UPDATE tutors SET status = ? WHERE id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, isApproved ? 1 : -1); // 1 for verified, -1 for rejected
+            pstmt.setString(1, isApproved ? "active" : "rejected");
             pstmt.setInt(2, tutorId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static boolean updateUserStatus(String tableName, int userId, String status) {
+        if (instance == null) return false;
+        
+        String sql = "UPDATE " + tableName + " SET status = ? WHERE id = ?";
+        try (PreparedStatement pstmt = instance.connection.prepareStatement(sql)) {
+            pstmt.setString(1, status);
+            pstmt.setInt(2, userId);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
     
@@ -874,11 +1107,83 @@ public class DatabaseManager {
         return tutors;
     }
 
+    public List<JSONObject> getAllConnections() {
+        List<JSONObject> connections = new ArrayList<>();
+        String sql = "SELECT a.id, a.tuition_post_id, a.tutor_id, a.status, a.created_at, " +
+                     "t.data as tutor_data, s.data as student_data " +
+                     "FROM applications a " +
+                     "JOIN tutors t ON a.tutor_id = t.id " +
+                     "JOIN tuition_posts tp ON a.tuition_post_id = tp.id " +
+                     "JOIN students s ON tp.student_id = s.id " +
+                     "WHERE a.status = 'accepted'";
+        
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                JSONObject conn = new JSONObject();
+                conn.put("id", rs.getInt("id"));
+                conn.put("tuition_post_id", rs.getInt("tuition_post_id"));
+                conn.put("tutor_id", rs.getInt("tutor_id"));
+                conn.put("status", rs.getString("status"));
+                conn.put("created_at", rs.getString("created_at"));
+                
+                JSONObject tutorData = new JSONObject(rs.getString("tutor_data"));
+                conn.put("tutor_name", tutorData.optString("name", "Unknown"));
+                
+                JSONObject studentData = new JSONObject(rs.getString("student_data"));
+                conn.put("student_name", studentData.optString("name", "Unknown"));
+                
+                connections.add(conn);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return connections;
+    }
+
+    public List<JSONObject> getAllTuitionPostsForAdmin() {
+        List<JSONObject> posts = new ArrayList<>();
+        String sql = "SELECT tp.id, tp.student_id, tp.data, tp.status, s.data as student_data " +
+                     "FROM tuition_posts tp JOIN students s ON tp.student_id = s.id";
+        
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                JSONObject post = new JSONObject(rs.getString("data"));
+                post.put("id", rs.getInt("id"));
+                post.put("student_id", rs.getInt("student_id"));
+                post.put("status", rs.getString("status"));
+                
+                JSONObject studentData = new JSONObject(rs.getString("student_data"));
+                post.put("student_name", studentData.optString("name", "Unknown"));
+                post.put("student_email", studentData.optString("email", ""));
+                
+                posts.add(post);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return posts;
+    }
+
+    public boolean updateTuitionPostStatus(int postId, String status) {
+        String sql = "UPDATE tuition_posts SET status = ? WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, status);
+            pstmt.setInt(2, postId);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public List<JSONObject> getAllUsers() {
         List<JSONObject> users = new ArrayList<>();
         
         // Get Students
-        String studentSql = "SELECT id, username, data FROM students";
+        String studentSql = "SELECT id, username, data, status FROM students";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(studentSql)) {
             while (rs.next()) {
@@ -886,6 +1191,7 @@ public class DatabaseManager {
                 user.put("id", rs.getInt("id"));
                 user.put("username", rs.getString("username"));
                 user.put("type", "Student");
+                user.put("status", rs.getString("status"));
                 users.add(user);
             }
         } catch (SQLException e) {
@@ -893,7 +1199,7 @@ public class DatabaseManager {
         }
         
         // Get Tutors
-        String tutorSql = "SELECT id, username, data, is_verified FROM tutors";
+        String tutorSql = "SELECT id, username, data, status FROM tutors";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(tutorSql)) {
             while (rs.next()) {
@@ -901,8 +1207,7 @@ public class DatabaseManager {
                 user.put("id", rs.getInt("id"));
                 user.put("username", rs.getString("username"));
                 user.put("type", "Tutor");
-                int verified = rs.getInt("is_verified");
-                user.put("status", verified == 1 ? "Verified" : (verified == -1 ? "Rejected" : "Pending"));
+                user.put("status", rs.getString("status"));
                 users.add(user);
             }
         } catch (SQLException e) {
@@ -910,5 +1215,169 @@ public class DatabaseManager {
         }
         
         return users;
+    }
+
+    // Report Methods
+    public boolean createReport(int reporterId, String reporterType, int reportedId, String reportedType, String reason) {
+        String sql = "INSERT INTO reports (reporter_id, reporter_type, reported_id, reported_type, reason) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, reporterId);
+            pstmt.setString(2, reporterType);
+            pstmt.setInt(3, reportedId);
+            pstmt.setString(4, reportedType);
+            pstmt.setString(5, reason);
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public org.json.JSONArray getAllReports() {
+        org.json.JSONArray reports = new org.json.JSONArray();
+        String sql = "SELECT * FROM reports ORDER BY created_at DESC";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                org.json.JSONObject report = new org.json.JSONObject();
+                report.put("id", rs.getInt("id"));
+                report.put("reporter_id", rs.getInt("reporter_id"));
+                report.put("reporter_type", rs.getString("reporter_type"));
+                report.put("reported_id", rs.getInt("reported_id"));
+                report.put("reported_type", rs.getString("reported_type"));
+                report.put("reason", rs.getString("reason"));
+                report.put("status", rs.getString("status"));
+                report.put("created_at", rs.getString("created_at"));
+                reports.put(report);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return reports;
+    }
+
+    public boolean updateReportStatus(int reportId, String status) {
+        String sql = "UPDATE reports SET status = ? WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, status);
+            pstmt.setInt(2, reportId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public String getUserName(int id, String type) {
+        String table = type.equalsIgnoreCase("student") ? "students" : "tutors";
+        String sql = "SELECT username FROM " + table + " WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("username");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Unknown";
+    }
+
+    public boolean banUser(int userId, String userType) {
+        String table = userType.equalsIgnoreCase("student") ? "students" : "tutors";
+        String sql = "UPDATE " + table + " SET status = 'banned' WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<JSONObject> getBannedUsers() {
+        List<JSONObject> users = new ArrayList<>();
+        String sqlStudent = "SELECT id, username, data, 'Student' as type FROM students WHERE status = 'banned'";
+        String sqlTutor = "SELECT id, username, data, 'Tutor' as type FROM tutors WHERE status = 'banned'";
+        
+        try (Statement stmt = connection.createStatement()) {
+            ResultSet rs = stmt.executeQuery(sqlStudent);
+            while (rs.next()) {
+                JSONObject user = new JSONObject(rs.getString("data"));
+                user.put("id", rs.getInt("id"));
+                user.put("username", rs.getString("username"));
+                user.put("type", "Student");
+                user.put("status", "banned");
+                users.add(user);
+            }
+            
+            rs = stmt.executeQuery(sqlTutor);
+            while (rs.next()) {
+                JSONObject user = new JSONObject(rs.getString("data"));
+                user.put("id", rs.getInt("id"));
+                user.put("username", rs.getString("username"));
+                user.put("type", "Tutor");
+                user.put("status", "banned");
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public boolean unbanUser(int userId, String userType) {
+        String table = userType.equalsIgnoreCase("student") ? "students" : "tutors";
+        // Restore to active/verified state
+        String newStatus = userType.equalsIgnoreCase("student") ? "active" : "verified";
+        String sql = "UPDATE " + table + " SET status = ? WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, newStatus);
+            pstmt.setInt(2, userId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteReport(int reportId) {
+        String sql = "DELETE FROM reports WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, reportId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public int getUnreadNotificationCount(int userId, String userType) {
+        String sql = "SELECT COUNT(*) FROM notifications WHERE user_id = ? AND user_type = ? AND is_read = 0";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            pstmt.setString(2, userType);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public void markNotificationsAsRead(int userId, String userType) {
+        String sql = "UPDATE notifications SET is_read = 1 WHERE user_id = ? AND user_type = ? AND is_read = 0";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            pstmt.setString(2, userType);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

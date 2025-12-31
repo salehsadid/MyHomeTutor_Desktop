@@ -29,11 +29,19 @@ public class AdminUserManagementController {
     @FXML private TableColumn<UserViewModel, String> typeColumn;
     @FXML private TableColumn<UserViewModel, String> statusColumn;
     @FXML private TableColumn<UserViewModel, Void> actionColumn;
+    
+    @FXML private javafx.scene.control.Label pageTitle;
+    @FXML private Button allUsersButton;
+    @FXML private Button pendingUsersButton;
+    @FXML private javafx.scene.control.ToggleButton themeToggle;
 
     private ObservableList<UserViewModel> userList = FXCollections.observableArrayList();
+    private String currentTypeFilter = "All";
+    private String currentStatusFilter = "All";
 
     @FXML
     private void initialize() {
+        themeToggle.setSelected(ThemeManager.getInstance().isDarkMode());
         idColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
         usernameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUsername()));
         typeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getType()));
@@ -43,42 +51,165 @@ public class AdminUserManagementController {
         loadAllUsers();
     }
 
-    private void loadAllUsers() {
-        userList.clear();
-        List<JSONObject> users = DatabaseManager.getInstance().getAllUsers();
-        for (JSONObject json : users) {
-            userList.add(new UserViewModel(
-                json.getInt("id"),
-                json.getString("username"),
-                json.getString("type"),
-                json.has("status") ? json.getString("status") : "N/A",
-                json
-            ));
+    @FXML
+    private void handleThemeToggle() {
+        ThemeManager.getInstance().toggleTheme(themeToggle.getScene());
+    }
+
+    public void setFilter(String type, String status) {
+        this.currentTypeFilter = type;
+        this.currentStatusFilter = status;
+        updateUI();
+        applyFilters();
+    }
+
+    private void updateUI() {
+        if ("Student".equalsIgnoreCase(currentTypeFilter)) {
+            pageTitle.setText("Students");
+            allUsersButton.setText("All Students");
+            pendingUsersButton.setText("Pending Students");
+        } else if ("Tutor".equalsIgnoreCase(currentTypeFilter)) {
+            pageTitle.setText("Tutors");
+            allUsersButton.setText("All Tutors");
+            pendingUsersButton.setText("Pending Tutors");
+        } else {
+            pageTitle.setText("User Management");
+            allUsersButton.setText("All Users");
+            pendingUsersButton.setText("Pending Users");
         }
-        usersTable.setItems(userList);
     }
 
-    @FXML
-    private void handleFilterAll() {
-        loadAllUsers();
-    }
-
-    @FXML
-    private void handleFilterPending() {
+    private void applyFilters() {
         userList.clear();
         List<JSONObject> users = DatabaseManager.getInstance().getAllUsers();
         for (JSONObject json : users) {
-            if ("Pending".equals(json.optString("status"))) {
+            String userType = json.getString("type");
+            String userStatus = json.optString("status", "N/A");
+
+            boolean typeMatch = "All".equalsIgnoreCase(currentTypeFilter) || userType.equalsIgnoreCase(currentTypeFilter);
+            boolean statusMatch = "All".equalsIgnoreCase(currentStatusFilter) || userStatus.equalsIgnoreCase(currentStatusFilter);
+
+            if (typeMatch && statusMatch) {
                 userList.add(new UserViewModel(
                     json.getInt("id"),
                     json.getString("username"),
-                    json.getString("type"),
-                    json.getString("status"),
+                    userType,
+                    userStatus,
                     json
                 ));
             }
         }
         usersTable.setItems(userList);
+    }
+
+    private void loadAllUsers() {
+        applyFilters();
+    }
+
+    @FXML
+    private void handleFilterAll() {
+        currentStatusFilter = "All";
+        applyFilters();
+    }
+
+    @FXML
+    private void handleFilterPending() {
+        currentStatusFilter = "Pending";
+        applyFilters();
+    }
+
+    @FXML
+    private void handleDashboard() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminDashboard.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) usersTable.getScene().getWindow();
+            Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleConnections() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminConnectionList.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) usersTable.getScene().getWindow();
+            Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleReports() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminReportList.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) usersTable.getScene().getWindow();
+            Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleTuitionPosts() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminTuitionPostList.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) usersTable.getScene().getWindow();
+            Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleStudents() {
+        setFilter("Student", "All");
+    }
+
+    @FXML
+    private void handleTutors() {
+        setFilter("Tutor", "All");
+    }
+
+    @FXML
+    private void handleBannedUsers() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminBannedUsers.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) usersTable.getScene().getWindow();
+            Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleLogout() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/HomePage.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) usersTable.getScene().getWindow();
+            Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
+            ThemeManager.getInstance().applyTheme(scene);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void addButtonToTable() {
@@ -90,6 +221,8 @@ public class AdminUserManagementController {
                     UserViewModel user = getTableView().getItems().get(getIndex());
                     if ("Tutor".equals(user.getType())) {
                         openTutorProfile(user);
+                    } else if ("Student".equals(user.getType())) {
+                        openStudentProfile(user);
                     }
                 });
             }
@@ -100,12 +233,7 @@ public class AdminUserManagementController {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    UserViewModel user = getTableView().getItems().get(getIndex());
-                    if ("Tutor".equals(user.getType())) {
-                        setGraphic(btn);
-                    } else {
-                        setGraphic(null);
-                    }
+                    setGraphic(btn);
                 }
             }
         });
@@ -123,54 +251,45 @@ public class AdminUserManagementController {
             
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
-            Scene scene = new Scene(root);
+            
+            javafx.geometry.Rectangle2D screenBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
+            Scene scene = new Scene(root, screenBounds.getWidth() * 0.8, screenBounds.getHeight() * 0.8);
+            
             ThemeManager.getInstance().applyTheme(scene);
             stage.setScene(scene);
             stage.showAndWait();
             
             // Refresh list after closing (in case status changed)
-            handleFilterAll(); // Or keep current filter
+            loadAllUsers(); 
             
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    @FXML
-    private void handleDashboard() {
+    private void openStudentProfile(UserViewModel user) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminDashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ViewStudentProfile.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) usersTable.getScene().getWindow();
             
-            // Preserve current size
-            double width = stage.getWidth();
-            double height = stage.getHeight();
+            ViewStudentProfileController controller = loader.getController();
+            controller.setStudentData(user.getJsonData());
+            controller.setStudentId(user.getId());
+            controller.setAdminMode(true);
             
-            Scene scene = new Scene(root, width, height);
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            
+            javafx.geometry.Rectangle2D screenBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
+            Scene scene = new Scene(root, screenBounds.getWidth() * 0.8, screenBounds.getHeight() * 0.8);
+            
             ThemeManager.getInstance().applyTheme(scene);
-            
             stage.setScene(scene);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void handleLogout() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/HomePage.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) usersTable.getScene().getWindow();
+            stage.showAndWait();
             
-            // Preserve current size
-            double width = stage.getWidth();
-            double height = stage.getHeight();
+            // Refresh list after closing (in case status changed)
+            loadAllUsers(); 
             
-            Scene scene = new Scene(root, width, height);
-            ThemeManager.getInstance().applyTheme(scene);
-            
-            stage.setScene(scene);
         } catch (IOException e) {
             e.printStackTrace();
         }

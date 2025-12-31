@@ -59,6 +59,40 @@ public class TutorApplicationsController {
         loadApplications();
     }
 
+    public void filterByApplicationId(int appId) {
+        applicationsContainer.getChildren().clear();
+        int tutorId = sessionManager.getUserId();
+        JSONArray applications = dbManager.getTutorApplications(tutorId);
+
+        // Add a "Show All" button
+        Button showAllBtn = new Button("← Show All Applications");
+        showAllBtn.setOnAction(e -> loadApplications());
+        showAllBtn.getStyleClass().add("action-button");
+        showAllBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #3b82f6; -fx-border-color: #3b82f6; -fx-border-radius: 5;");
+        HBox buttonContainer = new HBox(showAllBtn);
+        buttonContainer.setPadding(new Insets(0, 0, 10, 0));
+        applicationsContainer.getChildren().add(buttonContainer);
+
+        boolean found = false;
+        for (int i = 0; i < applications.length(); i++) {
+            JSONObject app = applications.getJSONObject(i);
+            if (app.getInt("id") == appId) {
+                VBox appCard = createApplicationCard(app);
+                // Highlight it
+                appCard.setStyle(appCard.getStyle() + "-fx-border-color: #3b82f6; -fx-border-width: 2;");
+                applicationsContainer.getChildren().add(appCard);
+                found = true;
+                break; 
+            }
+        }
+        
+        if (!found) {
+            Label label = new Label("Application details not found.");
+            label.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 14px;");
+            applicationsContainer.getChildren().add(label);
+        }
+    }
+
     private void loadApplications() {
         applicationsContainer.getChildren().clear();
         int tutorId = sessionManager.getUserId();

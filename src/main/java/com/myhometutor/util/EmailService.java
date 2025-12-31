@@ -20,7 +20,7 @@ public class EmailService {
         return String.valueOf(otp);
     }
 
-    public static boolean sendOTP(String recipientEmail, String otp) {
+    public static boolean sendEmail(String recipientEmail, String subject, String body) {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
@@ -38,23 +38,26 @@ public class EmailService {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(SENDER_EMAIL));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-            message.setSubject("MyHomeTutor - Email Verification OTP");
-            message.setContent(
-                "<html><body style='font-family: Arial, sans-serif;'>" +
-                "<p>Your OTP for MyHomeTutor registration is:</p>" +
-                "<h1 style='color: #2196F3; font-size: 48px; font-weight: bold;'>" + otp + "</h1>" +
-                "<p style='color: #f82727ff;'>Please do not share this code with anyone.</p>" +
-                "</body></html>",
-                "text/html; charset=utf-8"
-            );
+            message.setSubject(subject);
+            message.setContent(body, "text/html; charset=utf-8");
 
             Transport.send(message);
-            System.out.println("OTP sent successfully to " + recipientEmail);
+            System.out.println("Email sent successfully to " + recipientEmail);
             return true;
 
         } catch (MessagingException e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static boolean sendOTP(String recipientEmail, String otp) {
+        String subject = "MyHomeTutor - Email Verification OTP";
+        String body = "<html><body style='font-family: Arial, sans-serif;'>" +
+                "<p>Your OTP for MyHomeTutor registration is:</p>" +
+                "<h1 style='color: #2196F3; font-size: 48px; font-weight: bold;'>" + otp + "</h1>" +
+                "<p style='color: #f82727ff;'>Please do not share this code with anyone.</p>" +
+                "</body></html>";
+        return sendEmail(recipientEmail, subject, body);
     }
 }

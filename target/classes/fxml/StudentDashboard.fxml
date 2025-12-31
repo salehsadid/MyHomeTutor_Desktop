@@ -49,11 +49,14 @@
                 <Region HBox.hgrow="ALWAYS" />
                 
                 <HBox alignment="CENTER_RIGHT" spacing="10">
-                    <Button fx:id="notificationBtn" onAction="#handleNotifications" prefHeight="35" prefWidth="40" styleClass="header-button" text="🔔">
-                        <font>
-                            <Font size="16" />
-                        </font>
-                    </Button>
+                    <StackPane>
+                        <Button fx:id="notificationBtn" onAction="#handleNotifications" prefHeight="35" prefWidth="40" styleClass="header-button" text="🔔">
+                            <font>
+                                <Font size="16" />
+                            </font>
+                        </Button>
+                        <Circle fx:id="notificationBadge" fill="RED" radius="5" visible="false" StackPane.alignment="TOP_RIGHT" translateX="-5" translateY="5"/>
+                    </StackPane>
                     
                     <ToggleButton fx:id="themeToggle" onAction="#handleThemeToggle" styleClass="theme-toggle" />
                     

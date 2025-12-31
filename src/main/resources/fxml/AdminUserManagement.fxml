@@ -5,8 +5,10 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -24,9 +26,12 @@
             </Label>
             
             <Button text="Dashboard" onAction="#handleDashboard" styleClass="sidebar-button" maxWidth="Infinity"/>
-            <Button text="User Management" styleClass="sidebar-button" maxWidth="Infinity"/>
-            <Button text="Tuition Posts" styleClass="sidebar-button" maxWidth="Infinity"/>
-            <Button text="Reports" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Connections" onAction="#handleConnections" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Tutors" onAction="#handleTutors" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Students" onAction="#handleStudents" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Tuition Posts" onAction="#handleTuitionPosts" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Reports" onAction="#handleReports" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Banned Users" onAction="#handleBannedUsers" styleClass="sidebar-button" maxWidth="Infinity"/>
             <Button text="Logout" onAction="#handleLogout" styleClass="sidebar-button" style="-fx-text-fill: #ff6b6b;" maxWidth="Infinity">
                 <VBox.margin>
                     <Insets top="50" />
@@ -37,15 +42,19 @@
     
     <center>
         <VBox spacing="20" style="-fx-padding: 30;">
-            <Label text="User Management" styleClass="page-title">
-                <font>
-                    <Font name="System Bold" size="24" />
-                </font>
-            </Label>
+            <HBox alignment="CENTER_LEFT">
+                <Label fx:id="pageTitle" text="User Management" styleClass="page-title">
+                    <font>
+                        <Font name="System Bold" size="24" />
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <ToggleButton fx:id="themeToggle" onAction="#handleThemeToggle" styleClass="theme-toggle" />
+            </HBox>
             
             <HBox spacing="10">
-                <Button text="All Users" onAction="#handleFilterAll" styleClass="primary-button"/>
-                <Button text="Pending Tutors" onAction="#handleFilterPending" styleClass="primary-button"/>
+                <Button fx:id="allUsersButton" text="All Users" onAction="#handleFilterAll" styleClass="primary-button"/>
+                <Button fx:id="pendingUsersButton" text="Pending Tutors" onAction="#handleFilterPending" styleClass="primary-button"/>
             </HBox>
             
             <TableView fx:id="usersTable" VBox.vgrow="ALWAYS">

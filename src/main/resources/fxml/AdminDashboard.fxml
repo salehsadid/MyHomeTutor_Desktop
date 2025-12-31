@@ -3,8 +3,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -22,9 +24,12 @@
             </Label>
             
             <Button text="Dashboard" styleClass="sidebar-button" maxWidth="Infinity"/>
-            <Button text="User Management" onAction="#handleUserManagement" styleClass="sidebar-button" maxWidth="Infinity"/>
-            <Button text="Tuition Posts" styleClass="sidebar-button" maxWidth="Infinity"/>
-            <Button text="Reports" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Connections" onAction="#handleConnections" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Tutors" onAction="#handleTutors" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Students" onAction="#handleStudents" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Tuition Posts" onAction="#handleTuitionPosts" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Reports" onAction="#handleReports" styleClass="sidebar-button" maxWidth="Infinity"/>
+            <Button text="Banned Users" onAction="#handleBannedUsers" styleClass="sidebar-button" maxWidth="Infinity"/>
             <Button text="Logout" onAction="#handleLogout" styleClass="sidebar-button" style="-fx-text-fill: #ff6b6b;" maxWidth="Infinity">
                 <VBox.margin>
                     <Insets top="50" />
@@ -35,62 +40,92 @@
     
     <center>
         <VBox spacing="20" style="-fx-padding: 30;">
-            <Label text="Dashboard Overview" styleClass="page-title">
-                <font>
-                    <Font name="System Bold" size="24" />
-                </font>
-            </Label>
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Dashboard Overview" styleClass="page-title">
+                    <font>
+                        <Font name="System Bold" size="24" />
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <ToggleButton fx:id="themeToggle" onAction="#handleThemeToggle" styleClass="theme-toggle" />
+            </HBox>
             
+            <!-- Row 1: Tuition Posts & Connections -->
             <HBox spacing="20">
-                <VBox styleClass="dashboard-card" minWidth="200">
-                    <Label text="Total Students" styleClass="dashboard-metric-label"/>
-                    <Label fx:id="totalStudentsLabel" text="0" styleClass="dashboard-metric-value">
+                <VBox styleClass="dashboard-card" minWidth="260" onMouseClicked="#handleTotalTuitionPostsClick" style="-fx-cursor: hand;">
+                    <Label text="Total Tuition Posts" styleClass="dashboard-metric-label" mouseTransparent="true"/>
+                    <Label fx:id="totalTuitionPostsLabel" text="0" styleClass="dashboard-metric-value" mouseTransparent="true">
                         <font>
                             <Font name="System Bold" size="36" />
                         </font>
                     </Label>
                 </VBox>
                 
-                <VBox styleClass="dashboard-card" minWidth="200">
-                    <Label text="Total Tutors" styleClass="dashboard-metric-label"/>
-                    <Label fx:id="totalTutorsLabel" text="0" styleClass="dashboard-metric-value">
+                <VBox styleClass="dashboard-card" minWidth="260" onMouseClicked="#handlePendingTuitionPostsClick" style="-fx-cursor: hand;">
+                    <Label text="Pending Posts" styleClass="dashboard-metric-label" mouseTransparent="true"/>
+                    <Label fx:id="pendingTuitionPostsLabel" text="0" textFill="#e67e22" mouseTransparent="true">
                         <font>
                             <Font name="System Bold" size="36" />
                         </font>
                     </Label>
                 </VBox>
                 
-                <VBox styleClass="dashboard-card" minWidth="200">
-                    <Label text="Active Posts" styleClass="dashboard-metric-label"/>
-                    <Label fx:id="activePostsLabel" text="0" styleClass="dashboard-metric-value">
+                <VBox styleClass="dashboard-card" minWidth="260" onMouseClicked="#handleApprovedTuitionPostsClick" style="-fx-cursor: hand;">
+                    <Label text="Approved Posts" styleClass="dashboard-metric-label" mouseTransparent="true"/>
+                    <Label fx:id="approvedTuitionPostsLabel" text="0" textFill="#2ecc71" mouseTransparent="true">
                         <font>
                             <Font name="System Bold" size="36" />
                         </font>
                     </Label>
                 </VBox>
                 
-                <VBox styleClass="dashboard-card" minWidth="200">
-                    <Label text="Pending Verifications" styleClass="dashboard-metric-label"/>
-                    <Label fx:id="pendingVerificationsLabel" text="0" textFill="#e67e22">
+                <VBox styleClass="dashboard-card" minWidth="260" onMouseClicked="#handleTotalConnectionsClick" style="-fx-cursor: hand;">
+                    <Label text="Total Connections" styleClass="dashboard-metric-label" mouseTransparent="true"/>
+                    <Label fx:id="totalConnectionsLabel" text="0" styleClass="dashboard-metric-value" mouseTransparent="true">
                         <font>
                             <Font name="System Bold" size="36" />
                         </font>
                     </Label>
                 </VBox>
             </HBox>
-            
-            <Label text="Quick Actions" styleClass="page-title">
-                <font>
-                    <Font name="System Bold" size="18" />
-                </font>
-                <VBox.margin>
-                    <Insets top="20" />
-                </VBox.margin>
-            </Label>
-            
-            <HBox spacing="15">
-                <Button text="Verify Pending Tutors" onAction="#handleVerifyTutors" styleClass="primary-button" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-padding: 10 20;"/>
-                <Button text="Review Reports" styleClass="primary-button" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-padding: 10 20;"/>
+
+            <!-- Row 2: Users & Verifications -->
+            <HBox spacing="20">
+                <VBox styleClass="dashboard-card" minWidth="260" onMouseClicked="#handleTotalStudentsClick" style="-fx-cursor: hand;">
+                    <Label text="Total Students" styleClass="dashboard-metric-label" mouseTransparent="true"/>
+                    <Label fx:id="totalStudentsLabel" text="0" styleClass="dashboard-metric-value" mouseTransparent="true">
+                        <font>
+                            <Font name="System Bold" size="36" />
+                        </font>
+                    </Label>
+                </VBox>
+
+                <VBox styleClass="dashboard-card" minWidth="260" onMouseClicked="#handlePendingStudentVerificationsClick" style="-fx-cursor: hand;">
+                    <Label text="Student Pending" styleClass="dashboard-metric-label" mouseTransparent="true"/>
+                    <Label fx:id="pendingStudentVerificationsLabel" text="0" textFill="#e67e22" mouseTransparent="true">
+                        <font>
+                            <Font name="System Bold" size="36" />
+                        </font>
+                    </Label>
+                </VBox>
+                
+                <VBox styleClass="dashboard-card" minWidth="260" onMouseClicked="#handleTotalTutorsClick" style="-fx-cursor: hand;">
+                    <Label text="Total Tutors" styleClass="dashboard-metric-label" mouseTransparent="true"/>
+                    <Label fx:id="totalTutorsLabel" text="0" styleClass="dashboard-metric-value" mouseTransparent="true">
+                        <font>
+                            <Font name="System Bold" size="36" />
+                        </font>
+                    </Label>
+                </VBox>
+                
+                <VBox styleClass="dashboard-card" minWidth="260" onMouseClicked="#handlePendingTutorVerificationsClick" style="-fx-cursor: hand;">
+                    <Label text="Tutor Pending" styleClass="dashboard-metric-label" mouseTransparent="true"/>
+                    <Label fx:id="pendingTutorVerificationsLabel" text="0" textFill="#e67e22" mouseTransparent="true">
+                        <font>
+                            <Font name="System Bold" size="36" />
+                        </font>
+                    </Label>
+                </VBox>
             </HBox>
             
         </VBox>

@@ -310,7 +310,7 @@ public class ExploreTuitionsController {
             // Notify the student
             String tutorName = sessionManager.getCurrentUser().getString("name");
             String message = "Tutor " + tutorName + " has applied for your tuition post (ID: " + postId + ").";
-            dbManager.createNotification(studentId, "Student", message);
+            dbManager.createNotification(studentId, "Student", message, postId, "tuition_post");
             
             showAlert(Alert.AlertType.INFORMATION, "Success", "Application submitted successfully!");
         } else {

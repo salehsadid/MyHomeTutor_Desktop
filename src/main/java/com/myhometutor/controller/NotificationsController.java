@@ -44,6 +44,13 @@ NotificationsController {
         }
         
         loadNotifications();
+        markAsRead();
+    }
+    
+    private void markAsRead() {
+        int userId = sessionManager.getUserId();
+        String userType = sessionManager.getUserType();
+        dbManager.markNotificationsAsRead(userId, userType);
     }
     
     @FXML
@@ -129,7 +136,40 @@ NotificationsController {
 
     private void handleNotificationClick(JSONObject notif) {
         String userType = sessionManager.getUserType();
+        int referenceId = notif.optInt("referenceId", 0);
+        String referenceType = notif.optString("referenceType", null);
+
         try {
+            if (referenceId > 0 && referenceType != null) {
+                if ("tuition_post".equals(referenceType) && "Student".equals(userType)) {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/StudentPosts.fxml"));
+                    Parent root = loader.load();
+                    
+                    StudentPostsController controller = loader.getController();
+                    controller.filterByPostId(referenceId);
+                    
+                    Stage stage = (Stage) notificationsContainer.getScene().getWindow();
+                    Scene scene = new Scene(root);
+                    ThemeManager.getInstance().applyTheme(scene);
+                    stage.setScene(scene);
+                    stage.setTitle("MyHomeTutor - My Posts");
+                    return;
+                } else if ("application".equals(referenceType) && "Tutor".equals(userType)) {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/TutorApplications.fxml"));
+                    Parent root = loader.load();
+                    
+                    TutorApplicationsController controller = loader.getController();
+                    controller.filterByApplicationId(referenceId);
+                    
+                    Stage stage = (Stage) notificationsContainer.getScene().getWindow();
+                    Scene scene = new Scene(root);
+                    ThemeManager.getInstance().applyTheme(scene);
+                    stage.setScene(scene);
+                    stage.setTitle("MyHomeTutor - My Applications");
+                    return;
+                }
+            }
+
             String fxmlFile;
             String title;
             
@@ -144,7 +184,7 @@ NotificationsController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
             Parent root = loader.load();
             
-            Stage stage = (Stage) backButton.getScene().getWindow();
+            Stage stage = (Stage) notificationsContainer.getScene().getWindow();
             Scene scene = new Scene(root);
             ThemeManager.getInstance().applyTheme(scene);
             stage.setScene(scene);

@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -18,11 +19,13 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Optional;
 import java.nio.file.StandardCopyOption;
 
 public class StudentDashboardController {
     
     @FXML private Button notificationBtn;
+    @FXML private Circle notificationBadge;
     @FXML private ToggleButton themeToggle;
     @FXML private Button changePhotoBtn;
     
@@ -66,6 +69,16 @@ public class StudentDashboardController {
             profileImageView.getFitWidth() / 2
         );
         profileImageView.setClip(clip);
+        
+        checkNotifications();
+    }
+    
+    private void checkNotifications() {
+        JSONObject user = sessionManager.getCurrentUser();
+        if (user != null) {
+            int unreadCount = dbManager.getUnreadNotificationCount(user.getInt("id"), "Student");
+            notificationBadge.setVisible(unreadCount > 0);
+        }
     }
     
     private void loadUserData() {
@@ -341,21 +354,65 @@ public class StudentDashboardController {
     
     @FXML
     private void handleDeleteAccount() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Account");
-        alert.setHeaderText("Are you sure you want to delete your account?");
-        alert.setContentText("This action cannot be undone. All your data will be permanently removed.");
+        // Create a custom dialog
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Delete Account");
+        dialog.setHeaderText("Please enter your password to confirm account deletion.\nThis action cannot be undone.");
 
-        if (alert.showAndWait().get() == ButtonType.OK) {
+        // Set the button types
+        ButtonType deleteButtonType = new ButtonType("Delete", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(deleteButtonType, ButtonType.CANCEL);
+
+        // Create the password field
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Password");
+        passwordField.setStyle("-fx-pref-width: 200px;");
+
+        VBox content = new VBox(10);
+        content.getChildren().add(passwordField);
+        dialog.getDialogPane().setContent(content);
+
+        // Request focus on the password field by default
+        javafx.application.Platform.runLater(passwordField::requestFocus);
+
+        // Convert the result to a password string when the delete button is clicked
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == deleteButtonType) {
+                return passwordField.getText();
+            }
+            return null;
+        });
+        
+        // Apply theme
+        ThemeManager.getInstance().applyTheme(dialog.getDialogPane().getScene());
+
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(password -> {
+            if (password.isEmpty()) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Password cannot be empty.");
+                return;
+            }
+
             String username = sessionManager.getUsername();
             String userType = sessionManager.getUserType().toLowerCase();
             
-            if (dbManager.deleteUser(username, userType)) {
-                handleLogout();
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Could not delete account. Please try again.");
+            // Verify password
+            boolean isVerified = false;
+            if (dbManager.authenticateStudent(username, password) != null) {
+                isVerified = true;
             }
-        }
+
+            if (isVerified) {
+                if (dbManager.deleteUser(username, userType)) {
+                    handleLogout();
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Error", "Could not delete account. Please try again.");
+                }
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Authentication Failed", "Incorrect password. Account deletion cancelled.");
+            }
+        });
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {

@@ -210,6 +210,20 @@
                                 <Label fx:id="additionalInfoLabel" styleClass="field-label" text="No additional information provided." wrapText="true" />
                             </VBox>
                         </VBox>
+
+                        <VBox fx:id="verificationDocContainer" spacing="0" styleClass="info-card">
+                            <HBox styleClass="profile-section-header">
+                                <Label text="📄 Verification Document" />
+                            </HBox>
+                            
+                            <VBox spacing="15" alignment="CENTER">
+                                <padding>
+                                    <Insets bottom="25" left="30" right="30" top="25" />
+                                </padding>
+                                <ImageView fx:id="verificationDocImage" fitWidth="400" preserveRatio="true" />
+                                <Label fx:id="noDocLabel" text="No document uploaded" visible="false" managed="false"/>
+                            </VBox>
+                        </VBox>
                         
                     </VBox>
                 </HBox>
@@ -219,7 +233,10 @@
                     <Button text="Reject" onAction="#handleReject" style="-fx-background-color: #F44336; -fx-text-fill: white;" styleClass="primary-button"/>
                 </HBox>
 
-                <Button fx:id="closeButton" text="Close" onAction="#handleClose" styleClass="primary-button" />
+                <HBox alignment="CENTER" spacing="20">
+                    <Button fx:id="reportButton" text="Report User" onAction="#handleReport" styleClass="primary-button" style="-fx-background-color: #f39c12;"/>
+                    <Button fx:id="closeButton" text="Close" onAction="#handleClose" styleClass="primary-button" />
+                </HBox>
                 
             </VBox>
         </ScrollPane>
